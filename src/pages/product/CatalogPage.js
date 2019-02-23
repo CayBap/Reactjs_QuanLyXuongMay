@@ -2,7 +2,7 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux'
 import { Col, Row, Table, Card, CardBody, CardHeader,Button,ButtonGroup ,CardFooter,
-    Pagination,PaginationItem,PaginationLink,Modal, ModalHeader, ModalBody, ModalFooter,
+   Modal, ModalHeader, ModalBody, ModalFooter,
     Form,FormGroup,Label,Input
 } from 'reactstrap';
 import {
@@ -11,10 +11,11 @@ import {
     MdInfo,
   } from 'react-icons/lib/md';
 import NotificationSystem from 'react-notification-system';
-import { featchCreateCate, featchGetCate, featchDeleteCate } from '../../services/apis/cateService';
+import { featchCreateCate, featchGetCate, featchDeleteCate, featchUpdateCate } from '../../services/apis/cateService';
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
 import { actGetCateSuccess } from '../../actions/cateAct';
+import PaginationTable from '../../components/Pagination';
 const bem = bn.create('product');
 
 class CatalogPage extends React.Component {
@@ -25,17 +26,25 @@ class CatalogPage extends React.Component {
             modalUpdate: false,
             name:"",
             shortName:'',
-            description:'',
+            description: '',
+            updateName: '',
+            updateShortName: '',
+            updateDescription: '',
+            // currentCate:{},
+            id: '',
+            dataForPage: [],
+            entry: 5,
+            currentPage:0,
         };
     
         this.toggle = this.toggle.bind(this);
       }
     componentWillMount() {
         featchGetCate().then(result => {
-            // console.log(result.data)
-            this.props.onGetCateSuccess(result.data)
+            this.props.onGetCateSuccess(result.data);
         });
     }
+
     toggle() {
         this.setState(prevState => ({
           modal: !prevState.modal
@@ -45,7 +54,10 @@ class CatalogPage extends React.Component {
         this.setState(prevState => ({
           modalUpdate: !prevState.modalUpdate
         }));
-      }
+    }
+    handleCloseModel = () => {
+        this.setState({ modalUpdate: false });
+    }
     handleOnClickProduc = id => {
         this.props.history.push('/admin/product/detail/' + id);
     }
@@ -70,8 +82,10 @@ class CatalogPage extends React.Component {
             });
             featchGetCate().then(result => {
                 // console.log(result.data)
-                this.props.onGetCateSuccess(result.data)
+            //    this.setState({ dataForPage: result.data.slice(0, this.state.entry) });
+                this.props.onGetCateSuccess(result.data);
             });
+            this.setState({ description: '', name: '', id:'', shortName: '' });
         }).catch(err => {
             this.notificationSystem.addNotification({
                 title: <MdError/>,
@@ -79,6 +93,28 @@ class CatalogPage extends React.Component {
                 level: 'error',
               });
         })
+    }
+    handleUpdateCate = () => {
+        featchUpdateCate(this.state.id, { name: this.state.updateName, shortName: this.state.updateShortName, description: this.state.updateDescription }).then(result => {
+            featchGetCate().then(result => {
+                // console.log(result.data)
+                this.notificationSystem.addNotification({
+                    title: <MdInfo />,
+                    message: 'Cập nhập danh mục thành công!',
+                    level: 'success',
+                });
+            //    this.setState({ dataForPage: result.data.slice(0, this.state.entry) });
+            this.props.onGetCateSuccess(result.data);
+            });
+            this.setState({ modalUpdate: false });
+        }).catch(err => {
+            this.notificationSystem.addNotification({
+                title: <MdError />,
+                message: 'Cập nhập danh mục thất bại!',
+                level: 'error',
+            });
+        });
+
     }
     handleDeleteCate = (id) => {
         featchDeleteCate(id).then(result => {
@@ -89,7 +125,9 @@ class CatalogPage extends React.Component {
             });
             featchGetCate().then(result => {
                 // console.log(result.data)
-                this.props.onGetCateSuccess(result.data)
+                this.setState({ updateDescription: '', updateName: '', id, updateShortName: '' });
+                // this.setState({ dataForPage: result.data.slice(0, this.state.entry) });
+                this.props.onGetCateSuccess(result.data);
             });
         }).catch(err => {
             this.notificationSystem.addNotification({
@@ -101,13 +139,25 @@ class CatalogPage extends React.Component {
 
     }
     handleOpenUpdateModel = (id) => {
-        this.toggleUpdate();
+        const currentCate = this.props.cate.cates.find(item => {
+           return item._id === id;
+        })
+        if (currentCate) {
+            this.setState({ updateDescription: currentCate.description, updateName: currentCate.name, id, updateShortName: currentCate.shortName });
+            this.toggleUpdate();
+        }
 
     }
+    handleChangePage = (page) => {
+        console.log(page)
+        const {entry } = this.state;
+        this.setState({ dataForPage: this.props.cate.cates.slice(page*entry, page*entry+entry),currentPage:page});
+    }
     render() {
-        const { name, shortName, description } = this.state;
+        const { name, shortName, description,updateName,updateDescription,updateShortName,currentPage} = this.state;
         const { cate } = this.props;
         const cates = cate.cates || [];
+    
         return (
             <Page
                 title="Danh mục"
@@ -132,9 +182,10 @@ class CatalogPage extends React.Component {
                                     </thead>
                                     <tbody >
                                         {
-                                            cates.map((item,index) => {
-                                                return <tr  className = {bem.e('row')} >
-                                                    <th scope="row">{index}</th>
+                                            cates.slice(currentPage * this.state.entry, currentPage * this.state.entry + this.state.entry).map((item, index) => {
+                                                console.log(currentPage * this.state.entry, currentPage * this.state.entry + this.state.entry)
+                                                return <tr key = {index}  className = {bem.e('row')} >
+                                                    <th scope="row">{ currentPage * this.state.entry+index+1}</th>
                                                     <td>{item.name}</td>
                                                     <td>{item.description}</td>
                                                     <td>{item.shortName}</td>
@@ -151,39 +202,7 @@ class CatalogPage extends React.Component {
                                 </Table>
                             </CardBody>
                             <CardFooter>
-                                <Pagination aria-label="Page navigation example">
-                                    <PaginationItem>
-                                    <PaginationLink previous href="#" />
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        1
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem active>
-                                    <PaginationLink href="#">
-                                        2
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        3
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        4
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        5
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink next href="#" />
-                                    </PaginationItem>
-                                </Pagination>
+                                <PaginationTable data={cates} entry={10} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
                             </CardFooter>
                         </Card>
                     </Col>
@@ -216,22 +235,22 @@ class CatalogPage extends React.Component {
                     <ModalBody>
                         <Form>
                             <FormGroup>
-                            <Label for="name">Tên danh mục</Label>
-                            <Input type="text" name="name" id="name" value ={name} onChange = {this.handleChangeInput} placeholder="Tên danh mục" />
+                            <Label for="updateName">Tên danh mục</Label>
+                            <Input type="text" name="updateName" id="updateName" value ={updateName} onChange = {this.handleChangeInput} placeholder="Tên danh mục" />
                             </FormGroup>
                             <FormGroup>
-                            <Label for="shortName">Tên ngắn</Label>
-                            <Input type="email" name="shortName" id="shortName" value = {shortName} onChange = {this.handleChangeInput}  placeholder="Tên ngắn" />
+                            <Label for="updateShortName">Tên ngắn</Label>
+                            <Input type="text" name="updateShortName" id="updateShortName" value = {updateShortName} onChange = {this.handleChangeInput}  placeholder="Tên ngắn" />
                             </FormGroup>
                             <FormGroup>
-                            <Label for="description">Miêu tả</Label>
-                            <Input type="textarea"   name="description" id="description" value = {description} onChange = {this.handleChangeInput} placeholder="Miêu tả" />
+                            <Label for="updateDescription">Miêu tả</Label>
+                            <Input type="textarea"   name="updateDescription" id="updateDescription" value = {updateDescription} onChange = {this.handleChangeInput} placeholder="Miêu tả" />
                             </FormGroup>
                         </Form>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={ this.handleSaveCate}>Lưu</Button>
-                        <Button color="secondary" onClick={this.toggleUpdate}>Hủy bỏ</Button>
+                        <Button color="primary" onClick={ this.handleUpdateCate}>Lưu</Button>
+                        <Button color="secondary" onClick={this.handleCloseModel}>Hủy bỏ</Button>
                     </ModalFooter>
                 </Modal>
                 <NotificationSystem
@@ -239,8 +258,6 @@ class CatalogPage extends React.Component {
                 ref={notificationSystem =>
                     (this.notificationSystem = notificationSystem)
                 }
-                
-                // style={NOTIFICATION_SYSTEM_STYLE}
                 />
             </Page>
         );

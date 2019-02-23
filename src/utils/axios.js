@@ -32,7 +32,7 @@ instance.interceptors.response.use(function (response) {
 
 },async function (error) {
     if( error.response.status === 403){
-        // localStorage.clear();
+        localStorage.clear();
     } else if (error.response.status === 401) {
         // localStorage.clear();
     }

@@ -24,6 +24,7 @@ import ListEmployPage from './pages/timekepping/ListEmployPage';
 import PublicBoardPage from './pages/timekepping/PublicBoardPage';
 import ApprovalPage from './pages/timekepping/ApprovalPage';
 import ConfigurationPage from './pages/timekepping/ConfigurationPage';
+import AddProductPage from './pages/product/AddProductPage';
 
 const getBasename = () => {
   return `/${process.env.PUBLIC_URL.split('/').pop()}`;
@@ -56,6 +57,7 @@ class App extends React.Component {
             <PrivateRoute exact path="/admin" layout={MainLayout} component={DashboardPage} />
             <PrivateRoute exact path="/admin/system/user" layout={MainLayout} component={UserPage} />
             <PrivateRoute exact path="/admin/product/list" layout={MainLayout} component={ProductPage} />
+            <PrivateRoute exact path="/admin/product/list/add" layout={MainLayout} component={AddProductPage} />
             <PrivateRoute exact path="/admin/product/list/detail/:id" layout={MainLayout} component={ProductDetailPage} />
             <PrivateRoute exact path="/admin/product/catalog" layout={MainLayout} component={CatalogPage} />
             <PrivateRoute exact path="/admin/product/inventory" layout={MainLayout} component={InventoryPage} />

@@ -14,7 +14,7 @@ export const featchGetACate = (id) => {
     return axios.get(`${CATE}/${id}` );
 }
 export const featchUpdateCate = (id,body) => {
-    return axios.put(CATE, );
+    return axios.put(`${CATE}/${id}`,body );
 }
 export const featchDeleteCate = (id) => {
     return axios.delete(`${CATE}/${id}` );

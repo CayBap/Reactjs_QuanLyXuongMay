@@ -6,10 +6,10 @@ import { Navbar, Nav, NavItem } from 'reactstrap';
 
 const Footer = () => {
   return (
-      <Navbar style={{ backgroundColor: '#E9ECEF', position: 'fixed', bottom: 0,width:'100%',borderTop:'1px solid #7B838A',zIndex:100}}>
+      <Navbar >
       <Nav navbar>
         <NavItem>
-          Phát triển bởi Đỗ Thắng - Khoa CNTT trường Đại học Công Nghiệp Hà Nội
+          {/* Phát triển bởi Đỗ Thắng - Khoa CNTT trường Đại học Công Nghiệp Hà Nội */}
         </NavItem>
       </Nav>
     </Navbar>

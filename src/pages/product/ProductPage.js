@@ -1,15 +1,24 @@
 import React from 'react';
 import { compose } from 'redux';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import {Link} from 'react-router-dom';
 import { Col, Row, Table, Card, CardBody, CardHeader,Button,ButtonGroup ,CardFooter,Pagination,PaginationItem,PaginationLink} from 'reactstrap';
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
+import { featchGetProduct } from '../../services/apis/productService';
 const bem = bn.create('product');
 
 class ProductPage extends React.Component {
     handleOnClickProduc = id => {
         this.props.history.push('/admin/product/list/detail/' + id);
     }
+    componentWillMount() {
+        featchGetProduct().then(result => {
+            // this.props.onGetCateSuccess(result.data);
+            console.log(result)
+        });
+    }
+
     render() {
         return (
             <Page
@@ -20,7 +29,8 @@ class ProductPage extends React.Component {
                         <Card>
                             <CardHeader>
                                Danh sách sản phẩm
-                                <Button style = {{float:'right'}} size = "sm" outline color='primary'>Thêm mới</Button>
+                                <Button style = {{float:'right'}}  size = "sm"  color='primary'><Link to = "/admin/product/list/add" style= {{color:'white',textDecoration:'none'}}>Thêm mới</Link></Button>
+                                {/* <Link Component = {<Button></Button>} to= "/admin/product/list/add" style = {{float:'right'}} size = "sm" outline color='primary' >Thêm mới</Link> */}
                             </CardHeader>
                             <CardBody>
                                 <Table bordered>
