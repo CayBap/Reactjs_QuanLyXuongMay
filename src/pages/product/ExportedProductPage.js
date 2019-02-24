@@ -15,7 +15,7 @@ import {
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
 import PaginationTable from '../../components/Pagination';
-import { featchGetExportProduct, featchCreateExportProduct } from '../../services/apis/exportProductService';
+import { featchGetExportProduct, featchCreateExportProduct, featchDeleteExportProduct, featchUpdateExportProduct } from '../../services/apis/exportProductService';
 import { featchGetProduct } from '../../services/apis/productService';
 import { actGetExportProductSuccess } from '../../actions/exportProductAct';
 import { actGetProductSuccess } from '../../actions/productAct';
@@ -39,7 +39,9 @@ class ExportedProductPage extends React.Component {
             productId:'',
             selectedOption: null,
             isRed: false,
-            products: []
+            products: [],
+            deleteModal: false,
+            state:'',
         };
     
         this.toggle = this.toggle.bind(this);
@@ -56,10 +58,19 @@ class ExportedProductPage extends React.Component {
           });
     }
 
-      toggle() {
+    toggle() {
+        this.setState({ state: 'add' });
         this.setState(prevState => ({
           modal: !prevState.modal
         }));
+    }
+    deleteToggle(id) {
+        if (id) {
+            this.setState({id})
+        }
+        this.setState(prevState => ({
+            deleteModal: !prevState.deleteModal
+          }));
     }
     handleChange = (selectedOption) => {
         this.setState({ name:selectedOption.label });
@@ -78,25 +89,49 @@ class ExportedProductPage extends React.Component {
                 amount,
                 productId,
             }
-            featchCreateExportProduct(body).then(result => {
-                if (result.status === 200) {
+            console.log(this.state.state)
+            if (this.state.state === 'add') {
+                featchCreateExportProduct(body).then(result => {
+                    if (result.status === 200) {
+                        this.notificationSystem.addNotification({
+                            title: <MdInfo/>,
+                            message: 'Thêm mới hàng nhập thành công!',
+                            level: 'success',
+                        });
+                        featchGetExportProduct().then(result => {
+                          this.props.onGetExportProduct(result.data);
+                        });
+                        this.setState({ modal: false });
+                    }
+                }).catch(err => {
                     this.notificationSystem.addNotification({
-                        title: <MdInfo/>,
+                        title: <MdError/>,
                         message: 'Thêm mới hàng nhập thành công!',
-                        level: 'success',
+                        level: 'error',
                     });
-                    featchGetExportProduct().then(result => {
-                      this.props.onGetExportProduct(result.data);
+                })
+            }
+            if (this.state.state === 'update') {
+                featchUpdateExportProduct(this.state.id,body).then(result => {
+                    if (result.status === 200) {
+                        this.notificationSystem.addNotification({
+                            title: <MdInfo/>,
+                            message: 'Cập nhập hàng nhập thành công!',
+                            level: 'success',
+                        });
+                        featchGetExportProduct().then(result => {
+                          this.props.onGetExportProduct(result.data);
+                        });
+                        this.setState({ modal: false });
+                    }
+                }).catch(err => {
+                    this.notificationSystem.addNotification({
+                        title: <MdError/>,
+                        message: 'Cập nhập hàng nhập thành công!',
+                        level: 'error',
                     });
-                    this.setState({ modal: false });
-                }
-            }).catch(err => {
-                this.notificationSystem.addNotification({
-                    title: <MdError/>,
-                    message: 'Thêm mới hàng nhập thành công!',
-                    level: 'error',
-                });
-            })
+                })
+            }
         } else {
             this.setState({ isRed: true });
         }
@@ -108,6 +143,49 @@ class ExportedProductPage extends React.Component {
     handleChangePage = (page) => {
         const {entry } = this.state;
         this.setState({ dataForPage: this.props.exportProduct.exportProducts.slice(page*entry, page*entry+entry),currentPage:page});
+    }
+    handleOnDelete = () => {
+        this.setState({ modal: false });
+        featchDeleteExportProduct(this.state.id).then(result=>{
+            if (result.status === 200) {
+                featchGetExportProduct().then(result => {
+                    this.props.onGetExportProduct(result.data);
+                });
+                this.notificationSystem.addNotification({
+                    title: <MdInfo/>,
+                    message: 'Xóa hàng xuất thành công!',
+                    level: 'success',
+                });
+                this.setState({
+
+                })
+            } else {
+                this.notificationSystem.addNotification({
+                    title: <MdError/>,
+                    message: 'Xóa hàng xuất thất bại!',
+                    level: 'error',
+                });
+            }
+        }).catch(err => {
+            this.notificationSystem.addNotification({
+                title: <MdError/>,
+                message: 'Xóa hàng xuất thất bại!',
+                level: 'error',
+            });
+        })
+    }
+    handleUpdate = (id) => {
+        this.setState({ id, state: 'update' });
+        this.setState({ modal: true });
+        const { exportProduct} = this.props;
+        const exportProducts = exportProduct.exportProducts || [];
+        const product = exportProducts.find(item => {
+            return item._id === id;
+        });
+        const cuProduct = this.state.products.find(item => {
+            return item._id === product.productId;
+        });
+        this.setState({ selectedOption: cuProduct, amount: product.amount, name: product.name, timeToEnd: product.timeToEnd, totalPrice: product.totalPrice });
     }
     render() {
         const { currentPage ,products} = this.state;
@@ -150,8 +228,8 @@ class ExportedProductPage extends React.Component {
                                                         <td>{item.timeToEnd}</td>
                                             <td>
                                                 <ButtonGroup>
-                                                    <Button color = "info">Sửa</Button>
-                                                    <Button color = "danger">Xóa</Button>
+                                                    <Button color = "info" onClick = {()=>this.handleUpdate(item._id)}>Sửa</Button>
+                                                    <Button color = "danger" onClick = {()=>this.deleteToggle(item._id)} >Xóa</Button>
                                                 </ButtonGroup>
                                             </td>
                                                 </tr>
@@ -163,7 +241,7 @@ class ExportedProductPage extends React.Component {
                                 </Table>
                             </CardBody>
                             <CardFooter>
-                                <PaginationTable data={exportProducts} entry={10} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
+                                <PaginationTable data={exportProducts} entry={this.state.entry} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
                             </CardFooter>
                         </Card>
                     </Col>
@@ -210,6 +288,16 @@ class ExportedProductPage extends React.Component {
                     (this.notificationSystem = notificationSystem)
                 }
                 />
+                <Modal isOpen={this.state.deleteModal} toggle={()=>this.deleteToggle()} className={this.props.className}>
+                    <ModalHeader toggle={()=>this.deleteToggle()} >Cảnh báo</ModalHeader>
+                    <ModalBody>
+                        Bạn có chắc chắn muốn xóa sản phẩm?
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={this.handleOnDelete}>Xóa</Button>{' '}
+                        <Button color="secondary" onClick={()=>this.deleteToggle()} >Hủy</Button>
+                    </ModalFooter>
+                </Modal>
             </Page>
         );
     }

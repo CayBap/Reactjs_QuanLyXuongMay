@@ -9,6 +9,7 @@ import cate from './cate';
 import product from './product';
 import importProduct from './importProduct';
 import exportProduct from './exportProduct';
+import delivery from './delivery';
 
 /**
  * Merges the main reducer with the router state and dynamically injected reducers
@@ -20,6 +21,7 @@ export default function createReducer(injectedReducers = {}) {
       product,
       importProduct,
       exportProduct,
+      delivery,
     ...injectedReducers,
   });
 

@@ -7,3 +7,5 @@ export const CATE = `${BASE_URL}/api/cate`;
 export const PRODUCT = `${BASE_URL}/api/product`;
 export const IMPORT_PRODUCT = `${BASE_URL}/api/import-product`;
 export const EXPORT_PRODUCT = `${BASE_URL}/api/export-product`;
+export const USER = `${BASE_URL}/api/user`;
+export const DELIVERY = `${BASE_URL}/api/delivery`;

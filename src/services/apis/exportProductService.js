@@ -13,7 +13,8 @@ export const featchGetExportProduct = () => {
 export const featchGetAExportProduct = (id) => {
     return axios.get(`${EXPORT_PRODUCT}/${id}` );
 }
-export const featchUpdateExportProduct = (id,body) => {
+export const featchUpdateExportProduct = (id, body) => {
+    console.log(body)
     return axios.put(`${EXPORT_PRODUCT}/${id}`,body );
 }
 export const featchDeleteExportProduct = (id) => {
