@@ -4,9 +4,9 @@ export const initialState = fromJS({});
 const user = (state = initialState, action) => {
     switch (action.type) {
         case CATE_GET_SUCCESS:
-            // state.set('cates', action.data)
             state.cates = action.data;
             return {
+                ...state,
                 cates: state.cates
             }
         default: return [...state];

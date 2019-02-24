@@ -9,7 +9,6 @@ const bem = bn.create('user');
 class SalaryPage extends React.Component {
    
     render() {
-        console.log(bem.e('row'))
         return (
             <Page
                 // className="DashboardPage"

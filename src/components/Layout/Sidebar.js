@@ -36,12 +36,12 @@ const navContents = [
   { to: '/admin/system/role', name: 'Vai trò', exact: false, Icon: MdBorderAll },
   { to: '/admin/system/noti', name: 'Thông báo', exact: false, Icon: MdBorderAll },
 ];
-const emmployContents = [
-  { to: '/admin/employ/employs', name: 'Danh sách nhân viên', exact: false, Icon: MdTextFields },
-  { to: '/admin/system/publicBoard', name: 'Bảng công', exact: false, Icon: MdBorderAll },
-  { to: '/admin/system/apporal', name: 'Phê duyệt', exact: false, Icon: MdBorderAll },
-  { to: '/admin/system/configation', name: 'Cấu hình', exact: false, Icon: MdBorderAll },
-];
+// const emmployContents = [
+//   { to: '/admin/employ/employs', name: 'Danh sách nhân viên', exact: false, Icon: MdTextFields },
+//   { to: '/admin/system/publicBoard', name: 'Bảng công', exact: false, Icon: MdBorderAll },
+//   { to: '/admin/system/apporal', name: 'Phê duyệt', exact: false, Icon: MdBorderAll },
+//   { to: '/admin/system/configation', name: 'Cấu hình', exact: false, Icon: MdBorderAll },
+// ];
 
 const productContents = [
     {
@@ -224,7 +224,7 @@ class Sidebar extends React.Component {
               ))}
             </Collapse>
             
-            <NavItem
+            {/* <NavItem
               className={bem.e('nav-item')}
               onClick={this.handleClick('Employ')}>
               <BSNavLink className={bem.e('nav-item-collapse')}>
@@ -255,12 +255,11 @@ class Sidebar extends React.Component {
                     to={to}
                     activeClassName="active"
                     exact={exact}>
-                    {/* <Icon className={bem.e('nav-item-icon')} /> */}
                     <span  style = {{marginLeft:25}}>{name}</span>
                   </BSNavLink>
                 </NavItem>
               ))}
-            </Collapse>
+            </Collapse> */}
                     {endItems.map(({ to, name, exact, Icon }, index) => (
               <NavItem key={index} className={bem.e('nav-item')}>
                 <BSNavLink

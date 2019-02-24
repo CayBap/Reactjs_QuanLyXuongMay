@@ -25,6 +25,7 @@ import PublicBoardPage from './pages/timekepping/PublicBoardPage';
 import ApprovalPage from './pages/timekepping/ApprovalPage';
 import ConfigurationPage from './pages/timekepping/ConfigurationPage';
 import AddProductPage from './pages/product/AddProductPage';
+import EditProductPage from './pages/product/EditProductPage';
 
 const getBasename = () => {
   return `/${process.env.PUBLIC_URL.split('/').pop()}`;
@@ -58,13 +59,14 @@ class App extends React.Component {
             <PrivateRoute exact path="/admin/system/user" layout={MainLayout} component={UserPage} />
             <PrivateRoute exact path="/admin/product/list" layout={MainLayout} component={ProductPage} />
             <PrivateRoute exact path="/admin/product/list/add" layout={MainLayout} component={AddProductPage} />
+            <PrivateRoute exact path="/admin/product/list/edit/:id" layout={MainLayout} component={EditProductPage} />
             <PrivateRoute exact path="/admin/product/list/detail/:id" layout={MainLayout} component={ProductDetailPage} />
             <PrivateRoute exact path="/admin/product/catalog" layout={MainLayout} component={CatalogPage} />
             <PrivateRoute exact path="/admin/product/inventory" layout={MainLayout} component={InventoryPage} />
             <PrivateRoute exact path="/admin/product/exportedProducts" layout={MainLayout} component={ExportedProductPage} />
             <PrivateRoute exact path="/admin/product/importedProducts" layout={MainLayout} component={ImportedProductPage} />
             <PrivateRoute exact path="/admin/product/delivery" layout={MainLayout} component={DeliveryPage} />
-                    <PrivateRoute exact path="/admin/product/salary" layout={MainLayout} component={SalaryPage} />
+            <PrivateRoute exact path="/admin/product/salary" layout={MainLayout} component={SalaryPage} />
                     
             <PrivateRoute exact path="/admin/employ/employs" layout={MainLayout} component={ListEmployPage} />
             <PrivateRoute exact path="/admin/system/publicBoard" layout={MainLayout} component={PublicBoardPage} />

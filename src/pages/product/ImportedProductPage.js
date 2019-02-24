@@ -2,29 +2,95 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux'
 import { Col, Row, Table, Card, CardBody, CardHeader,Button,ButtonGroup ,CardFooter,
-    Pagination,PaginationItem,PaginationLink,Modal, ModalHeader, ModalBody, ModalFooter,
+   Modal, ModalHeader, ModalBody, ModalFooter,
     Form,FormGroup,Label,Input
 } from 'reactstrap';
+import NotificationSystem from 'react-notification-system';
+import {
+    MdError,
+    // MdCardGiftcard,
+    MdInfo,
+  } from 'react-icons/lib/md';
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
+import PaginationTable from '../../components/Pagination';
+import { featchGetImportProduct, featchCreateImportProduct } from '../../services/apis/importProductService';
+import { actGetImportProductSuccess } from '../../actions/importProductAct';
 const bem = bn.create('product');
 
 class ImportedProductPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-          modal: false
+            modal: false,
+            name: '',
+            shortName: '',
+            unit: '',
+            totalPrice: '',
+            timeToEnd: '',
+            amount: '',
+            dataForPage: [],
+            entry: 5,
+            currentPage: 0,
+            id: '',
         };
     
         this.toggle = this.toggle.bind(this);
       }
-    
+      componentWillMount() {
+          featchGetImportProduct().then(result => {
+            this.props.onGetImportProduct(result.data);
+        });
+    }
+
       toggle() {
         this.setState(prevState => ({
           modal: !prevState.modal
         }));
-      }
+    }
+    handleSubmitCreate = e => {
+        e.preventDefault();
+        const { name,shortName,unit,totalPrice,timeToEnd,amount } = this.state;
+        const body = {
+            name,
+            shortName,
+            unit,
+            totalPrice,
+            timeToEnd,
+            amount,
+        }
+        featchCreateImportProduct(body).then(result => {
+            if (result.status === 200) {
+                this.notificationSystem.addNotification({
+                    title: <MdInfo/>,
+                    message: 'Thêm mới hàng nhập thành công!',
+                    level: 'success',
+                });
+                featchGetImportProduct().then(result => {
+                  this.props.onGetImportProduct(result.data);
+                });
+                this.setState({ modal: false });
+            }
+        }).catch(err => {
+            this.notificationSystem.addNotification({
+                title: <MdError/>,
+                message: 'Thêm mới hàng nhập thành công!',
+                level: 'error',
+            });
+        })
+    }
+
+    handleChageInput = (e) => {
+        this.setState({ [e.target.name]: e.target.value });
+    }
+    handleChangePage = (page) => {
+        const {entry } = this.state;
+        this.setState({ dataForPage: this.props.importProduct.importProducts.slice(page*entry, page*entry+entry),currentPage:page});
+    }
     render() {
+        const { currentPage} = this.state;
+        const { importProduct } = this.props;
+        const importProducts = importProduct.importProducts || [];
         return (
             <Page
                 title="Hàng nhập"
@@ -52,97 +118,92 @@ class ImportedProductPage extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody >
-                                        <tr  className = {bem.e('row')} >
-                                            <th scope="row">1</th>
-                                            <td>Vải</td>
-                                            <td>m2</td>
-                                            <td>1000</td>
-                                            <td>10000000</td>
-                                            <td>01/01/2019</td>
+                                    {
+                                            importProducts.slice(currentPage * this.state.entry, currentPage * this.state.entry + this.state.entry).map((item,index) => {
+                                                return (
+                                                    // <tr  key = {item._id} className = {bem.e('row')} onClick = {()=>this.handleOnClickProduc(item._id)}>
+                                                    <tr  key = {item._id} className = {bem.e('row')} >
+                                                        <th scope="row">{index+1}</th>
+                                                        <td>{item.name}</td>
+                                                        <td>{item.unit}</td>
+                                                        <td>{item.amount}</td>
+                                                        <td>{item.totalPrice}</td>
+                                                        <td>{item.timeToEnd}</td>
                                             <td>
                                                 <ButtonGroup>
                                                     <Button color = "info">Sửa</Button>
                                                     <Button color = "danger">Xóa</Button>
                                                 </ButtonGroup>
                                             </td>
-                                        </tr>
+                                                </tr>
+                                                )
+                                            })
+                                        }
+                                        
                                     </tbody>
                                 </Table>
                             </CardBody>
                             <CardFooter>
-                                <Pagination aria-label="Page navigation example">
-                                    <PaginationItem>
-                                    <PaginationLink previous href="#" />
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        1
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem active>
-                                    <PaginationLink href="#">
-                                        2
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        3
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        4
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        5
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink next href="#" />
-                                    </PaginationItem>
-                                </Pagination>
+                                <PaginationTable data={importProducts} entry={10} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
                             </CardFooter>
                         </Card>
                     </Col>
                 </Row>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className} >
-                    <ModalHeader>Thêm mới danh mục</ModalHeader>
-                    <ModalBody>
-                        <Form>
+                    <Form onSubmit = {this.handleSubmitCreate}>
+                        <ModalHeader>Thêm mới hàng nhập</ModalHeader>
+                        <ModalBody>
                             <FormGroup>
-                            <Label for="name">Tên danh mục</Label>
-                            <Input type="text" name="name" id="name" placeholder="Tên danh mục" />
+                                <Label for="name">Tên danh mục</Label>
+                                <Input required  value = {this.state.name} onChange = {this.handleChageInput} type="text" name="name" id="name" placeholder="Tên danh mục" />
                             </FormGroup>
                             <FormGroup>
-                            <Label for="shortName">Tên ngắn</Label>
-                            <Input type="email" name="shortName" id="shortName" placeholder="Tên danh mục" />
+                                <Label for="shortName">Tên ngắn</Label>
+                                <Input type="text" value = {this.state.shortName} onChange = {this.handleChageInput}  name="shortName" id="shortName" placeholder="Tên ngắn" />
                             </FormGroup>
                             <FormGroup>
-                            <Label for="description">Miêu tả</Label>
-                            <Input type="textarea"   name="description" id="description" placeholder="Tên danh mục" />
+                                <Label for="unit">Đơn vị</Label>
+                                <Input required value = {this.state.unit}  onChange = {this.handleChageInput} type="text" name="unit" id="unit" placeholder="Đơn vị" />
                             </FormGroup>
-                        </Form>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="primary" onClick={this.toggle}>Lưu</Button>
-                        <Button color="secondary" onClick={this.toggle}>Hủy bỏ</Button>
-                    </ModalFooter>
+                            <FormGroup>
+                                <Label for="totalPrice">Giá</Label>
+                                <Input required value = {this.state.totalPrice} onChange = {this.handleChageInput}  type="number" name="totalPrice" id="totalPrice" placeholder="Giá" />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="timeToEnd">Thời gian nhập</Label>
+                                <Input required value = {this.state.timeToEnd}  onChange = {this.handleChageInput} type="date" name="timeToEnd" id="timeToEnd" placeholder="Thời gian nhập" />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="amount">Số lượng</Label>
+                                <Input required value = {this.state.amount} onChange = {this.handleChageInput}  type="number" name="amount" id="amount" placeholder="Số lượng" />
+                            </FormGroup>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button type = "submit" color="primary" >Lưu</Button>
+                            <Button color="secondary" onClick={this.toggle}>Hủy bỏ</Button>
+                        </ModalFooter>
+
+                    </Form>
                 </Modal>
+                <NotificationSystem
+                dismissible={false}
+                ref={notificationSystem =>
+                    (this.notificationSystem = notificationSystem)
+                }
+                />
             </Page>
         );
     }
 }
 const mapStateToProps = (state) => {
     return {
-        user: state.user
+        importProduct: state.importProduct
     }
 }
 const mapDispatchToProps = (dispatch, props) => {
     return {
-        onLoginSuccess: data => {
-            // dispatch(actLoginSuccess(data));
+        onGetImportProduct: data => {
+            dispatch(actGetImportProductSuccess(data));
         },
     }
 }

@@ -149,7 +149,6 @@ class CatalogPage extends React.Component {
 
     }
     handleChangePage = (page) => {
-        console.log(page)
         const {entry } = this.state;
         this.setState({ dataForPage: this.props.cate.cates.slice(page*entry, page*entry+entry),currentPage:page});
     }

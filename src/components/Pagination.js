@@ -19,7 +19,7 @@ class PaginationTable extends React.Component {
     showPagi = () => {
         let arrPagiItem = [];
 
-        for (let i = 0; i <= this.state.pages; i++) {
+        for (let i = 0; i < this.state.pages; i++) {
             arrPagiItem.push(<PaginationItem key={i} active={(i) === this.props.currentPage ? true : false} onClick={() => this.props.handleChangePage(i)}>
                 <PaginationLink>
                     {i + 1}

@@ -1,16 +1,43 @@
 import React from 'react';
 import { compose } from 'redux';
-import { connect } from 'react-redux'
-import { Col, Row, Table, Card, CardBody, CardHeader,Button ,CardFooter,Pagination,PaginationItem,PaginationLink} from 'reactstrap';
+import { connect } from 'react-redux';
+import { Col, Row, Table, Card, CardBody, CardHeader ,CardFooter} from 'reactstrap';
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
+import PaginationTable from '../../components/Pagination';
+import { actGetProductSuccess } from '../../actions/productAct';
+import { featchGetProduct } from '../../services/apis/productService';
 const bem = bn.create('product');
 
 class ProductPage extends React.Component {
-    handleOnClickProduc = id => {
-        this.props.history.push('/admin/product/detail/' + id);
+    constructor(props) {
+        super(props);
+        this.state = {
+            dataForPage: [],
+            entry: 5,
+            currentPage: 0,
+            modal: false,
+            id: '',
+        };
+    }
+    componentWillMount() {
+        featchGetProduct().then(result => {
+            this.props.onGetProductSuccess(result.data);
+        });
+    }
+    handleChangePage = (page) => {
+        const {entry } = this.state;
+        this.setState({ dataForPage: this.props.product.products.slice(page*entry, page*entry+entry),currentPage:page});
     }
     render() {
+        const { currentPage} = this.state;
+        const { product } = this.props;
+        let products = product.products || [];
+        if (product.products) {
+            products =  products.filter(item => {
+                return item.inventory > 0;
+            })  
+        }
         return (
             <Page
                 title="Tồn kho"
@@ -20,7 +47,6 @@ class ProductPage extends React.Component {
                         <Card>
                             <CardHeader>
                                Hàng tồn kho
-                                <Button style = {{float:'right'}} size = "sm" outline color='primary'>Thêm mới</Button>
                             </CardHeader>
                             <CardBody>
                                 <Table bordered>
@@ -34,50 +60,26 @@ class ProductPage extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody >
-                                        <tr  className = {bem.e('row')} onClick = {()=>this.handleOnClickProduc('abc')}>
-                                            <th scope="row">1</th>
-                                            <td><img style = {{width:'100px'}} alt = "ảnh" src = 'http://ladykids.com.vn/wp-content/uploads/2017/12/e.jpg'></img></td>
-                                            <td>Quẩn bò trẻ em</td>
-                                            <td>50000</td>
-                                            <td>3000</td>
-                                        </tr>
+                                        
+                                        {
+                                            products.slice(currentPage * this.state.entry, currentPage * this.state.entry + this.state.entry).map((item,index) => {
+                                                return (
+                                                    <tr  key = {item._id} className = {bem.e('row')} >
+                                                    <th scope="row">{index+1}</th>
+                                                    <td><img style = {{width:'100px'}} alt = "ảnh" src = {item.mainImage?item.mainImage:'https://png.pngtree.com/svg/20161222/the_bottom_bar_icon_selected_merchandise_678940.png'}></img></td>
+                                                    <td>{item.name}</td>
+                                                    <td>{item.price}</td>
+                                                    <td>{item.inventory}</td>
+                                                    
+                                                </tr>
+                                                )
+                                            })
+                                        }
                                     </tbody>
                                 </Table>
                             </CardBody>
                             <CardFooter>
-                                <Pagination aria-label="Page navigation example">
-                                    <PaginationItem>
-                                    <PaginationLink previous href="#" />
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        1
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        2
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        3
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        4
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink href="#">
-                                        5
-                                    </PaginationLink>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                    <PaginationLink next href="#" />
-                                    </PaginationItem>
-                                </Pagination>
+                            <PaginationTable data={products} entry={this.state.entry} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
                             </CardFooter>
                         </Card>
                     </Col>
@@ -88,13 +90,14 @@ class ProductPage extends React.Component {
 }
 const mapStateToProps = (state) => {
     return {
-        user: state.user
+        // user: state.user
+        product: state.product
     }
 }
 const mapDispatchToProps = (dispatch, props) => {
     return {
-        onLoginSuccess: data => {
-            // dispatch(actLoginSuccess(data));
+        onGetProductSuccess: data => {
+            dispatch(actGetProductSuccess(data));
         },
     }
 }

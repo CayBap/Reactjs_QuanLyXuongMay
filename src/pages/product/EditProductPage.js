@@ -15,11 +15,11 @@ import {
 import Page from '../../components/Page';
 // import bn from 'utils/bemnames';
 import { actGetCateSuccess } from '../../actions/cateAct';
-import { featchGetCate } from '../../services/apis/cateService';
-import { featchCreateProduct } from '../../services/apis/productService';
+import { featchGetCate,  } from '../../services/apis/cateService';
+import {  featchGetAProduct, featchUpdateProduct } from '../../services/apis/productService';
 // const bem = bn.create('product');
 
-class ProductAddPage extends React.Component {
+class EditProductPage extends React.Component {
     constructor(props) {
 		super(props);
         this.state = { 
@@ -43,19 +43,52 @@ class ProductAddPage extends React.Component {
         featchGetCate().then(result => {
             this.props.onGetCateSuccess(result.data);
         });
+        const arrPath = window.location.pathname.split('/');
+        const id = arrPath[arrPath.length - 1];
+        featchGetAProduct(id).then(result => {
+            if (result.status === 200) {
+                const data = result.data;
+                const { name,shortName,description,size,color,amount,price,priceForEmploy,cate,subImage} = data;
+                this.setState({
+                    id,
+                    name,
+                    shortName,
+                    description,
+                    size,
+                    color,
+                    amount,
+                    price,
+                    priceForEmploy,
+                    cate,
+                    subImage,
+                });
+            }
+        })
+        // console.log()
+        // featchGetACate()
+
     }
     handleChageInput = (e) => {
         this.setState({ [e.target.name]: e.target.value });
     }
-
     handleOnClickCreateProduct = (e) => {
         e.preventDefault();
-        const { name,shortName,description,size,color,amount,price,priceForEmploy,cate,subImage } = this.state;
+        const { name, shortName, description, size, color, amount, price, priceForEmploy, cate, subImage } = this.state;
+        let newSize = size;
+        let newColor = color;
+        if (typeof size ==='string') {
+            newSize = size !== '' ? size.split(',') : undefined;
+        }
+        if (typeof color ==='string') {
+            newColor = color !== '' ? color.split(',') : undefined;
+        }
+        const arrPath = window.location.pathname.split('/');
+        const id = arrPath[arrPath.length - 1];
         const body = {
             name,
             shortName,
-            size: size !== '' ? size.split(',') : undefined,
-            color: color !== '' ? color.split(',') : undefined,
+            size: newSize ,
+            color: newColor,
             description,
             amount,
             price,
@@ -63,11 +96,11 @@ class ProductAddPage extends React.Component {
             cate,
             subImage
         }
-        featchCreateProduct(body).then(result => {
+        featchUpdateProduct(id,body).then(result => {
             if (result.status === 200) {
                 this.notificationSystem.addNotification({
                     title: <MdInfo/>,
-                    message: 'Thêm mới sản phẩm thành công!',
+                    message: 'Cập nhập sản phẩm thành công!',
                     level: 'success',
                 });
                 setTimeout(() => {
@@ -76,7 +109,7 @@ class ProductAddPage extends React.Component {
             } else {
                 this.notificationSystem.addNotification({
                     title: <MdError/>,
-                    message: 'Thêm mới sản phẩm thất bại!',
+                    message: 'Cập nhập sản phẩm thất bại!',
                     level: 'error',
                 });
             }
@@ -100,17 +133,20 @@ class ProductAddPage extends React.Component {
                             </CardHeader>
                                 <CardBody>
                               
-                                  <ImagesUploader
-                                    url="http://localhost:4040/api/upload"
-                                    optimisticPreviews
-                                    onLoadEnd={(err, result) => {
-                                        if (err) {
-                                            // console.error(err);
-                                        }
-                                        if (result) {
-                                            this.setState({ subImage: result });
-                                        }
-                                    }}
+                                    <ImagesUploader
+                                        url="http://localhost:4040/api/upload"
+                                        optimisticPreviews
+                                        onLoadEnd={(err, result) => {
+                                            if (err) {
+                                                // console.error(err);
+                                            }
+                                            if (result) {
+                                                this.setState({ subImage: result });
+                                            }
+                                        }}
+                                        multiple ={true}
+                                        images = {this.state.subImage}
+                                    
                                     label="Tải ảnh sản phẩm"
                                     />
                                 </CardBody>
@@ -208,4 +244,4 @@ const mapDispatchToProps = (dispatch, props) => {
 }
 export default compose(
     connect(mapStateToProps, mapDispatchToProps),
-)(ProductAddPage);
+)(EditProductPage);
