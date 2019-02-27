@@ -75,7 +75,7 @@ class ExportedProductPage extends React.Component {
     handleChange = (selectedOption) => {
         this.setState({ name:selectedOption.label });
         this.setState({ productId: selectedOption.value });
-        this.setState({selectedOption})
+        this.setState({ selectedOption });
 
       }
     handleSubmitCreate = e => {
@@ -95,7 +95,7 @@ class ExportedProductPage extends React.Component {
                     if (result.status === 200) {
                         this.notificationSystem.addNotification({
                             title: <MdInfo/>,
-                            message: 'Thêm mới hàng nhập thành công!',
+                            message: 'Thêm mới hàng xuất thành công!',
                             level: 'success',
                         });
                         featchGetExportProduct().then(result => {
@@ -106,7 +106,7 @@ class ExportedProductPage extends React.Component {
                 }).catch(err => {
                     this.notificationSystem.addNotification({
                         title: <MdError/>,
-                        message: 'Thêm mới hàng nhập thành công!',
+                        message: 'Thêm mới hàng xuất thất bại!',
                         level: 'error',
                     });
                 })
@@ -116,7 +116,7 @@ class ExportedProductPage extends React.Component {
                     if (result.status === 200) {
                         this.notificationSystem.addNotification({
                             title: <MdInfo/>,
-                            message: 'Cập nhập hàng nhập thành công!',
+                            message: 'Cập nhập hàng xuất thành công!',
                             level: 'success',
                         });
                         featchGetExportProduct().then(result => {
@@ -127,7 +127,7 @@ class ExportedProductPage extends React.Component {
                 }).catch(err => {
                     this.notificationSystem.addNotification({
                         title: <MdError/>,
-                        message: 'Cập nhập hàng nhập thành công!',
+                        message: 'Cập nhập hàng xuất thất bại!',
                         level: 'error',
                     });
                 })
@@ -145,7 +145,7 @@ class ExportedProductPage extends React.Component {
         this.setState({ dataForPage: this.props.exportProduct.exportProducts.slice(page*entry, page*entry+entry),currentPage:page});
     }
     handleOnDelete = () => {
-        this.setState({ modal: false });
+        this.setState({ deleteModal: false });
         featchDeleteExportProduct(this.state.id).then(result=>{
             if (result.status === 200) {
                 featchGetExportProduct().then(result => {
@@ -187,11 +187,26 @@ class ExportedProductPage extends React.Component {
         });
         this.setState({ selectedOption: cuProduct, amount: product.amount, name: product.name, timeToEnd: product.timeToEnd, totalPrice: product.totalPrice });
     }
+    handleType = (e) => {
+        const product = this.state.products.find(item => {
+            return item._id === this.state.selectedOption.value;
+        })
+        this.setState({ totalPrice: product.price * e.target.value });
+    }
     render() {
         const { currentPage ,products} = this.state;
         const { exportProduct} = this.props;
         const exportProducts = exportProduct.exportProducts || [];
-        const  newProducts = products.map(item => { return { value: item._id, label: item.name } });
+        const newProducts = products.map(item => { return { value: item._id, label: item.name } });
+        const getSumValueForEmploy = (price) => {
+          
+            const formatter = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0
+            });
+            return formatter.format(price);
+          }
         return (
             <Page
                 title="Hàng nhập"
@@ -224,7 +239,7 @@ class ExportedProductPage extends React.Component {
                                                         <th scope="row">{index+1}</th>
                                                         <td>{item.name}</td>
                                                         <td>{item.amount}</td>
-                                                        <td>{item.totalPrice}</td>
+                                                        <td>{getSumValueForEmploy(item.totalPrice)}</td>
                                                         <td>{item.timeToEnd}</td>
                                             <td>
                                                 <ButtonGroup>
@@ -248,7 +263,7 @@ class ExportedProductPage extends React.Component {
                 </Row>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className} >
                     <Form onSubmit = {this.handleSubmitCreate}>
-                        <ModalHeader>Thêm mới hàng nhập</ModalHeader>
+                        <ModalHeader>Thêm mới hàng xuất</ModalHeader>
                         <ModalBody>
                             <FormGroup>
                                 <Label for="name">Sản phẩm</Label>
@@ -263,7 +278,7 @@ class ExportedProductPage extends React.Component {
                            
                             <FormGroup>
                                 <Label for="amount">Số lượng</Label>
-                                <Input required value = {this.state.amount} onChange = {this.handleChageInput}  type="number" name="amount" id="amount" placeholder="Số lượng" />
+                                <Input required value = {this.state.amount} onKeyUp = {this.handleType}  onChange = {this.handleChageInput}  type="number" name="amount" id="amount" placeholder="Số lượng" />
                             </FormGroup>
                             <FormGroup>
                                 <Label for="totalPrice">Giá</Label>

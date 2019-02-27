@@ -13,7 +13,7 @@ const ProductMedia = ({ image, title, description, right, ...restProps }) => {
           object
           src={image}
           className="rounded mr-2 mb-2"
-          style={{ width: 100, height: 'auto' }}
+          style={{ width: 'auto', height: 100 }}
         />
       </Media>
       <Media body className="overflow-hidden">

@@ -77,6 +77,15 @@ class ProductPage extends React.Component {
         const { currentPage} = this.state;
         const { product } = this.props;
         const products = product.products || [];
+        const getSumValueForEmploy =(price) => {
+          
+            const formatter = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0
+            });
+            return formatter.format(price);
+          }
         return (
             <Page
                 title="Sản phẩm"
@@ -112,7 +121,7 @@ class ProductPage extends React.Component {
                                                     <th scope="row">{index+1}</th>
                                                     <td><img style = {{width:'100px'}} alt = "ảnh" src = {item.mainImage?item.mainImage:'https://png.pngtree.com/svg/20161222/the_bottom_bar_icon_selected_merchandise_678940.png'}></img></td>
                                                     <td>{item.name}</td>
-                                                    <td>{item.price}</td>
+                                                    <td>{getSumValueForEmploy(item.price)}</td>
                                                     <td>{item.amount}</td>
                                                     <td>
                                                         <ButtonGroup>
@@ -130,7 +139,7 @@ class ProductPage extends React.Component {
                                 </Table>
                             </CardBody>
                             <CardFooter>
-                            <PaginationTable data={products} entry={10} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
+                            <PaginationTable data={products} entry={this.state.entry} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
                             </CardFooter>
                         </Card>
                     </Col>
@@ -151,41 +160,19 @@ class ProductPage extends React.Component {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td><img src = "http://ladykids.com.vn/wp-content/uploads/2017/12/e.jpg" alt = "quan" style = {{width:50}}></img></td>
-                                            <td>Quần bò</td>
-                                            <td>1000</td>
-                                        </tr>
-                                       
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td><img src = "http://ladykids.com.vn/wp-content/uploads/2017/12/e.jpg" alt = "quan" style = {{width:50}}></img></td>
-                                            <td>Quần bò</td>
-                                            <td>1000</td>
-                                        </tr>
-                                       
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td><img src = "http://ladykids.com.vn/wp-content/uploads/2017/12/e.jpg" alt = "quan" style = {{width:50}}></img></td>
-                                            <td>Quần bò</td>
-                                            <td>1000</td>
-                                        </tr>
-                                       
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td><img src = "http://ladykids.com.vn/wp-content/uploads/2017/12/e.jpg" alt = "quan" style = {{width:50}}></img></td>
-                                            <td>Quần bò</td>
-                                            <td>1000</td>
-                                        </tr>
-                                       
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td><img src = "http://ladykids.com.vn/wp-content/uploads/2017/12/e.jpg" alt = "quan" style = {{width:50}}></img></td>
-                                            <td>Quần bò</td>
-                                            <td>1000</td>
-                                        </tr>
-                                       
+                                      
+                                        {
+                                            products.sort((a, b) => {
+                                                return b.amount-a.amount;
+                                            }).slice(0, 5).map((item,index) => {
+                                               return ( <tr className = {bem.e('row')}>
+                                               <th scope="row">{index+1}</th>
+                                           <td><img src = {item.mainImage} alt = "quan" style = {{width:50}}></img></td>
+                                               <td>{item.name}</td>
+                                               <td>{item.amount}</td>
+                                       </tr>)
+                                            })
+                                       }
                                        
                                     </tbody>
                                 </Table>

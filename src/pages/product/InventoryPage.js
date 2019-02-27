@@ -38,6 +38,15 @@ class ProductPage extends React.Component {
                 return item.inventory > 0;
             })  
         }
+        const getSumValueForEmploy = (price) => {
+          
+            const formatter = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0
+            });
+            return formatter.format(price);
+          }
         return (
             <Page
                 title="Tồn kho"
@@ -68,7 +77,7 @@ class ProductPage extends React.Component {
                                                     <th scope="row">{index+1}</th>
                                                     <td><img style = {{width:'100px'}} alt = "ảnh" src = {item.mainImage?item.mainImage:'https://png.pngtree.com/svg/20161222/the_bottom_bar_icon_selected_merchandise_678940.png'}></img></td>
                                                     <td>{item.name}</td>
-                                                    <td>{item.price}</td>
+                                                    <td>{getSumValueForEmploy(item.price)}</td>
                                                     <td>{item.inventory}</td>
                                                     
                                                 </tr>

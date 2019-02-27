@@ -52,7 +52,9 @@ class Header extends React.Component {
   state = {
     isOpenNotificationPopover: false,
     isNotificationConfirmed: false,
-    isOpenUserCardPopover: false,
+      isOpenUserCardPopover: false,
+      name: '',
+    phone:''
   };
 
   toggleNotificationPopover = () => {
@@ -81,7 +83,11 @@ class Header extends React.Component {
         localStorage.clear();
         // window.location.href = '/login';
         // this.props.history.push()
-  }
+    }
+    componentDidMount() {
+        this.setState({ name: localStorage.getItem('name') });
+        this.setState({ phone: localStorage.getItem('phone') });
+    }
   render() {
     const { isNotificationConfirmed } = this.state;
 
@@ -140,9 +146,9 @@ class Header extends React.Component {
               style={{ minWidth: 250 }}>
               <PopoverBody className="p-0 border-light">
                 <UserCard
-                  title="Jane"
-                  subtitle="jane@jane.com"
-                  text="Last updated 3 mins ago"
+                  title={this.state.name}
+                  subtitle={this.state.phone}
+                //   text="Last updated 3 mins ago"
                   className="border-light">
                   <ListGroup flush>
                     <ListGroupItem tag="button" action className="border-light">

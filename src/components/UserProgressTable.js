@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'utils/propTypes';
 
-import { Table, Progress } from 'reactstrap';
+import { Table } from 'reactstrap';
 
 import Avatar from 'components/Avatar';
 
@@ -21,7 +21,7 @@ const UserProgressTable = ({ headers, usersData, ...restProps }) => {
         </tr>
       </thead>
       <tbody>
-        {usersData.map(({ avatar, name, date, progress }, index) => (
+        {usersData.map(({ avatar, name, date, gender,total }, index) => (
           <tr key={index}>
             <td className="align-middle text-center">
               <AvatarWithBadge src={avatar} />
@@ -29,9 +29,9 @@ const UserProgressTable = ({ headers, usersData, ...restProps }) => {
             <td className="align-middle text-center">{name}</td>
             <td className="align-middle text-center">{date}</td>
             <td className="align-middle text-center">
-              <Progress value={progress} style={{ height: 5 }} />
+             {gender===true?"Nam":"Nữ"}
             </td>
-            <td className="align-middle text-center">{progress}%</td>
+                <td className="align-middle text-center">{total}</td>
           </tr>
         ))}
       </tbody>

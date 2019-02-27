@@ -1,4 +1,5 @@
 import axiosBasic from '../../utils/axiosBasic';
+import axios from '../../utils/axios';
 import {
     LOGIN
 } from '../../constants/urlRequrest';
@@ -10,7 +11,7 @@ export const featchLogin = (phone, password) => {
         phone: phone,
         password: password
     };
-    return axiosBasic.post(LOGIN, body);
+    return axios.post(LOGIN, body);
 }
 export const featchSignUp = async (phone, password, firstName, lastName) => {
 

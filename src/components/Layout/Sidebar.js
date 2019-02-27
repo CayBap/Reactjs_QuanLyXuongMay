@@ -5,7 +5,7 @@ import React from 'react';
 // import FaGithub from 'react-icons/lib/fa/github';
 import {
   MdAccountCircle,
-  MdBorderAll,
+//   MdBorderAll,
   MdDashboard,
   MdKeyboardArrowDown,
   MdPages,
@@ -33,8 +33,8 @@ const sidebarBackground = {
 
 const navContents = [
   { to: '/admin/system/user', name: 'Người dùng', exact: false, Icon: MdTextFields },
-  { to: '/admin/system/role', name: 'Vai trò', exact: false, Icon: MdBorderAll },
-  { to: '/admin/system/noti', name: 'Thông báo', exact: false, Icon: MdBorderAll },
+//   { to: '/admin/system/role', name: 'Vai trò', exact: false, Icon: MdBorderAll },
+//   { to: '/admin/system/noti', name: 'Thông báo', exact: false, Icon: MdBorderAll },
 ];
 // const emmployContents = [
 //   { to: '/admin/employ/employs', name: 'Danh sách nhân viên', exact: false, Icon: MdTextFields },
@@ -88,7 +88,7 @@ const navItems = [
 ];
 const endItems = [
   { to: '/', name: 'Thông tin nhà phát triển', exact: true, Icon: MdDashboard },
-  { to: '/', name: 'Giúp đỡ', exact: true, Icon: MdDashboard },
+//   { to: '/', name: 'Giúp đỡ', exact: true, Icon: MdDashboard },
   
 ];
 
@@ -96,10 +96,10 @@ const bem = bn.create('sidebar');
 
 class Sidebar extends React.Component {
   state = {
-    isOpenComponents: false,
-    isOpenContents: false,
-    isOpenPages: false,
-    isOpenEmploy:false,
+    isOpenComponents: true,
+    isOpenContents: true,
+    isOpenPages: true,
+    isOpenEmploy:true,
   };
 
   handleClick = name => () => {
@@ -127,7 +127,7 @@ class Sidebar extends React.Component {
                 alt=""
               /> */}
               <span className="text-white">
-                Came.vn 
+                Quản lý xưởng may
               </span>
             {/* </SourceLink> */}
           </Navbar>

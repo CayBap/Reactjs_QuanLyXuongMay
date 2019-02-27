@@ -18,12 +18,25 @@ class PrivateRoute extends React.Component {
       <Route
         {...rest}
         render={props => {
-          if (this.isLoginSystem()) {
-            return (
-              <Layout>
-                <InnerComponent {...props} />
-              </Layout>
-            );
+            if (this.isLoginSystem()) {
+                if (this.props.rolePage === localStorage.getItem('role')) {
+                    return (
+                        <Layout>
+                          <InnerComponent {...props} />
+                        </Layout>
+                      );
+                }
+                if (!this.props.rolePage) {
+                    return (
+                        <Layout>
+                          <InnerComponent {...props} />
+                        </Layout>
+                      );
+                }
+                else {
+                    this.props.history.goBack();
+                }
+           
           }
           return <Redirect to={{ pathname: '/login', state: { from: location } }} />;
         }}

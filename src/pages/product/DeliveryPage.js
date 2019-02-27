@@ -42,7 +42,11 @@ class DeliveryPage extends React.Component {
             state: '',
             users: [],
             selectedProduct: null,
-            selectedUser:null
+            selectedUser: null,
+            arrColor: [],
+            arrSize: [],
+            color: '',
+            size:''
         };
     
         this.toggle = this.toggle.bind(this);
@@ -77,8 +81,15 @@ class DeliveryPage extends React.Component {
           }));
     }
     handleChange = (selectedProduct) => {
+        const { products } = this.state;
+        const cuProduct = products.find(item => {
+            return item._id === selectedProduct.value;
+        });
+        this.setState({arrColor: cuProduct.color});
+        this.setState({arrSize: cuProduct.size});
         this.setState({ productName:selectedProduct.label });
         this.setState({ productId: selectedProduct.value });
+
         this.setState({selectedProduct})
 
       }
@@ -102,12 +113,13 @@ class DeliveryPage extends React.Component {
                 timeToEnd,
                 amount,
             }
+            console.log(body)
             if (this.state.state === 'add') {
                 featchCreateDelivery(body).then(result => {
                     if (result.status === 200) {
                         this.notificationSystem.addNotification({
                             title: <MdInfo/>,
-                            message: 'Thêm mới hàng nhập thành công!',
+                            message: 'Giao hàng thành công!',
                             level: 'success',
                         });
                         featchGetDelivery().then(result => {
@@ -118,7 +130,7 @@ class DeliveryPage extends React.Component {
                 }).catch(err => {
                     this.notificationSystem.addNotification({
                         title: <MdError/>,
-                        message: 'Thêm mới hàng nhập thành công!',
+                        message: 'Giao hàng thất bại!',
                         level: 'error',
                     });
                 })
@@ -128,7 +140,7 @@ class DeliveryPage extends React.Component {
                     if (result.status === 200) {
                         this.notificationSystem.addNotification({
                             title: <MdInfo/>,
-                            message: 'Cập nhập hàng nhập thành công!',
+                            message: 'Cập nhập giao hàng thành công!',
                             level: 'success',
                         });
                         featchGetDelivery().then(result => {
@@ -139,7 +151,7 @@ class DeliveryPage extends React.Component {
                 }).catch(err => {
                     this.notificationSystem.addNotification({
                         title: <MdError/>,
-                        message: 'Cập nhập hàng nhập thành công!',
+                        message: 'Cập nhập giao hàng thành công!',
                         level: 'error',
                     });
                 })
@@ -150,6 +162,7 @@ class DeliveryPage extends React.Component {
     }
 
     handleChageInput = (e) => {
+        console.log(this.state)
         this.setState({ [e.target.name]: e.target.value });
     }
     handleChangePage = (page) => {
@@ -181,7 +194,7 @@ class DeliveryPage extends React.Component {
         }).catch(err => {
             this.notificationSystem.addNotification({
                 title: <MdError/>,
-                message: 'Xóa hàng xuất thất bại!',
+                message: 'Xóa giao hàng thất bại!',
                 level: 'error',
             });
         })
@@ -306,7 +319,7 @@ class DeliveryPage extends React.Component {
                 </Row>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className} >
                     <Form onSubmit = {this.handleSubmitCreate}>
-                        <ModalHeader>Thêm mới hàng nhập</ModalHeader>
+                        <ModalHeader>Thêm mới hàng giao</ModalHeader>
                         <ModalBody>
                         <FormGroup>
                                 <Label for="name">Sản phẩm</Label>
@@ -332,11 +345,28 @@ class DeliveryPage extends React.Component {
                             
                             <FormGroup>
                                 <Label for="size">Kích thước</Label>
-                                <Input  value = {this.state.size} onChange = {this.handleChageInput}  type="text" name="size" id="size" placeholder="Kích thước" />
+                                {/* <Input  value = {this.state.size} onChange = {this.handleChageInput}  type="text" name="size" id="size" placeholder="Kích thước" /> */}
+                                <Input  value = {this.state.size} onChange = {this.handleChageInput}  type="select" name="size" id="size" placeholder="Kích thước" >
+                                <option>--Lựa chọn---</option>
+                                {this.state.arrSize.map((item,index) => {
+                                        return (
+                                            <option key = {item} value = {item}>{item}</option>
+                                        )
+                                    })}
+                                </Input>
                             </FormGroup>
                             <FormGroup>
                                 <Label for="color">Màu sắc</Label>
-                                <Input  value = {this.state.color} onChange = {this.handleChageInput}  type="text" name="color" id="color" placeholder="Màu sắc" />
+                           
+                                {/* <Input  value = {this.state.color} onChange = {this.handleChageInput}  type="text" name="color" id="color" placeholder="Màu sắc" /> */}
+                                <Input value={this.state.color} onChange={this.handleChageInput} type="select" name="color" id="color" placeholder="Màu sắc"  >
+                                <option>--Lựa chọn---</option>
+                                    {this.state.arrColor.map(item => {
+                                        return (
+                                            <option key = {item} value = {item}>{item}</option>
+                                        )
+                                    })}
+                                </Input>
                             </FormGroup>
                             <FormGroup>
                                 <Label for="amount">Số lượng</Label>

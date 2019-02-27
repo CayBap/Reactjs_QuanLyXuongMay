@@ -5,7 +5,6 @@ import { Col, Row, Table, Card, CardBody, CardHeader,Button,ButtonGroup ,CardFoo
    Modal, ModalHeader, ModalBody, ModalFooter,
     Form,FormGroup,Label,Input
 } from 'reactstrap';
-import Select from 'react-select';
 import NotificationSystem from 'react-notification-system';
 import {
     MdError,
@@ -24,19 +23,20 @@ class UserPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            phone: '',
+            password: '',
+            email: '',
+            firstName: '',
+            lastName: '',
+            dob: '',
+            gender: '',
+            role:'',
             modal: false,
-            name: '',
-            // shortName: '',
-            // unit: '',
-            totalPrice: '',
-            timeToEnd: '',
-            amount: '',
             dataForPage: [],
             entry: 5,
             currentPage: 0,
             id: '',
             userId:'',
-            selectedOption: null,
             isRed: false,
             users: [],
             deleteModal: false,
@@ -45,7 +45,6 @@ class UserPage extends React.Component {
     
         this.toggle = this.toggle.bind(this);
     }
-    
       componentWillMount() {
           featchGetUser().then(result => {
             this.props.onGetUser(result.data);
@@ -67,30 +66,20 @@ class UserPage extends React.Component {
             deleteModal: !prevState.deleteModal
           }));
     }
-    handleChange = (selectedOption) => {
-        this.setState({ name:selectedOption.label });
-        this.setState({ userId: selectedOption.value });
-        this.setState({selectedOption})
 
-      }
     handleSubmitCreate = e => {
         e.preventDefault();
-        const { name, totalPrice, timeToEnd, amount, userId } = this.state;
-        if (name !== "") {
+        const { phone,password,email,lastName,firstName,dob,gender,role } = this.state;
+        if (phone !== "") {
             const body = {
-                name,
-                totalPrice,
-                timeToEnd,
-                amount,
-                userId,
+                phone,password,email,lastName,firstName,dob,gender,role
             }
-            console.log(this.state.state)
             if (this.state.state === 'add') {
                 featchCreateUser(body).then(result => {
                     if (result.status === 200) {
                         this.notificationSystem.addNotification({
                             title: <MdInfo/>,
-                            message: 'Thêm mới hàng nhập thành công!',
+                            message: 'Thêm mới người dùng thành công!',
                             level: 'success',
                         });
                         featchGetUser().then(result => {
@@ -101,7 +90,7 @@ class UserPage extends React.Component {
                 }).catch(err => {
                     this.notificationSystem.addNotification({
                         title: <MdError/>,
-                        message: 'Thêm mới hàng nhập thành công!',
+                        message: 'Thêm mới người dùng thất bại!',
                         level: 'error',
                     });
                 })
@@ -140,7 +129,7 @@ class UserPage extends React.Component {
         this.setState({ dataForPage: this.props.user.users.slice(page*entry, page*entry+entry),currentPage:page});
     }
     handleOnDelete = () => {
-        this.setState({ modal: false });
+        this.setState({ deleteModal: false });
         featchDeleteUser(this.state.id).then(result=>{
             if (result.status === 200) {
                 featchGetUser().then(result => {
@@ -172,21 +161,19 @@ class UserPage extends React.Component {
     handleUpdate = (id) => {
         this.setState({ id, state: 'update' });
         this.setState({ modal: true });
-        const { user} = this.props;
+        const { user } = this.props;
         const users = user.users || [];
-        // const user = users.find(item => {
-        //     return item._id === id;
-        // });
-        // const cuUser = this.state.users.find(item => {
-        //     return item._id === user.userId;
-        // });
-        // this.setState({ selectedOption: cuUser, amount: user.amount, name: user.name, timeToEnd: user.timeToEnd, totalPrice: user.totalPrice });
+        const cuUser = users.find(item => {
+            return item._id === id;
+        });
+       
+        const { phone, email, lastName, firstName, dob, gender ,role} = cuUser;
+        this.setState({ phone,password:'',email,lastName,firstName,dob,gender,role });
     }
     render() {
         const { currentPage } = this.state;
         const { user} = this.props;
         const users = user.users || [];
-        const  newUsers = users.map(item => { return { value: item._id, label: item.name } });
         return (
             <Page
                 title="Người dùng"
@@ -243,30 +230,46 @@ class UserPage extends React.Component {
                 </Row>
                 <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className} >
                     <Form onSubmit = {this.handleSubmitCreate}>
-                        <ModalHeader>Thêm mới hàng nhập</ModalHeader>
+                        <ModalHeader>Thêm mới người dùng</ModalHeader>
                         <ModalBody>
+                            
                             <FormGroup>
-                                <Label for="name">Sản phẩm</Label>
-                                <Select 
-                                    
-                                    value={this.state.selectedOption}
-                                    onChange={this.handleChange}
-                                    options={newUsers}
-                                    placeholder  = "Lựa chọn ..."
-                                />
-                            </FormGroup>
-                           
-                            <FormGroup>
-                                <Label for="amount">Số lượng</Label>
-                                <Input required value = {this.state.amount} onChange = {this.handleChageInput}  type="number" name="amount" id="amount" placeholder="Số lượng" />
+                                <Label for="phone">Số điện thoại</Label>
+                                <Input required value = {this.state.phone} onChange = {this.handleChageInput}  type="text" name="phone" id="phone" placeholder="Số điện thoại" />
                             </FormGroup>
                             <FormGroup>
-                                <Label for="totalPrice">Giá</Label>
-                                <Input required value = {this.state.totalPrice} onChange = {this.handleChageInput}  type="number" name="totalPrice" id="totalPrice" placeholder="Giá" />
+                                <Label for="email">Email</Label>
+                                <Input required value = {this.state.email} onChange = {this.handleChageInput}  type="email" name="email" id="email" placeholder="Email" />
                             </FormGroup>
                             <FormGroup>
-                                <Label for="timeToEnd">Thời gian nhập</Label>
-                                <Input required value = {this.state.timeToEnd}  onChange = {this.handleChageInput} type="date" name="timeToEnd" id="timeToEnd" placeholder="Thời gian nhập" />
+                                <Label for="password">Mật khẩu</Label>
+                                <Input required value = {this.state.password} onChange = {this.handleChageInput}  type="password" name="password" id="password" placeholder="Mật khẩu" />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="lastName">Họ</Label>
+                                <Input required value = {this.state.lastName} onChange = {this.handleChageInput}  type="text" name="lastName" id="lastName" placeholder="Họ" />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="firstName">Tên</Label>
+                                <Input required value = {this.state.firstName}  onChange = {this.handleChageInput} type="text" name="firstName" id="firstName" placeholder="Tên" />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="dob">Ngày sinh</Label>
+                                <Input required value = {this.state.dob}  onChange = {this.handleChageInput} type="date" name="dob" id="dob"  />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="gender">Giới tính</Label>
+                                <Input required value={this.state.gender} onChange={this.handleChageInput} type="select" name="gender" id="gender" >
+                                    <option value = {true}>Nam</option>
+                                    <option value = {false}>Nữ</option>
+                                </Input>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="role">Quyền thao tác</Label>
+                                <Input required value={this.state.role} onChange={this.handleChageInput} type="select" name="role" id="role" >
+                                    <option value = 'admin'>Quản trị viên</option>
+                                    <option value = 'staff'>Thợ may</option>
+                                </Input>
                             </FormGroup>
                            
                         </ModalBody>

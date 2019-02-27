@@ -7,6 +7,23 @@ import { featchLogin, featchSignUp } from '../services/apis/authService';
 import { actLoginSuccess } from '../actions/authAct';
 
 class AuthPage extends React.Component {
+    componentWillMount() {
+        if (localStorage.getItem('jwt'))
+        {
+            if (localStorage.getItem('role')==='admin') {
+                this.props.history.push('/admin');
+            } else {
+                this.props.history.push('/staff');
+            }
+        }
+    }
+    // componentWillUpdate(nextProps) {
+    //     if (nextProps.user.role === 'admin') {
+    //         this.props.history.push('/admin');
+    //     } else {
+    //         this.props.history.push('/staff');
+    //     }
+    // }
   handleAuthState = authState => {
     if (authState === STATE_LOGIN) {
       this.props.history.push('/login');
@@ -23,7 +40,11 @@ class AuthPage extends React.Component {
             featchLogin(body.phone, body.password).then((result) => {
                 if (result.status === 200) {
                     this.props.onLoginSuccess(result.data);
-                    this.props.history.push('/home');
+                    if (result.data.role === 'admin') {
+                        this.props.history.push('/admin');
+                    } else {
+                        this.props.history.push('/staff');
+                    }
                 }
             }).catch((err) => {
 

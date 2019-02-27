@@ -26,13 +26,22 @@ import ApprovalPage from './pages/timekepping/ApprovalPage';
 import ConfigurationPage from './pages/timekepping/ConfigurationPage';
 import AddProductPage from './pages/product/AddProductPage';
 import EditProductPage from './pages/product/EditProductPage';
+import EmployPage from './pages/EmployPage';
+import StaffLayout from './components/Layout/StaffLayout';
 
 const getBasename = () => {
   return `/${process.env.PUBLIC_URL.split('/').pop()}`;
 };
 
 class App extends React.Component {
-  render() {
+    state = {
+        role:'admin',
+    }
+    componentWillMount() {
+        this.setState({ role: localStorage.getItem('role') });
+    }
+    render() {
+      
     return (
       <BrowserRouter basename={getBasename()}>
         <GAListener>
@@ -48,33 +57,41 @@ class App extends React.Component {
             />
             <LayoutRoute
               exact
+              path="/"
+              layout={EmptyLayout}
+              component={props => (
+                <AuthPage {...props} authState={STATE_LOGIN} />
+              )}
+            />
+            <LayoutRoute
+              exact
               path="/signup"
               layout={EmptyLayout}
               component={props => (
                 <AuthPage {...props} authState={STATE_SIGNUP} />
               )}
             />
-
-            <PrivateRoute exact path="/admin" layout={MainLayout} component={DashboardPage} />
-            <PrivateRoute exact path="/admin/system/user" layout={MainLayout} component={UserPage} />
-            <PrivateRoute exact path="/admin/product/list" layout={MainLayout} component={ProductPage} />
-            <PrivateRoute exact path="/admin/product/list/add" layout={MainLayout} component={AddProductPage} />
-            <PrivateRoute exact path="/admin/product/list/edit/:id" layout={MainLayout} component={EditProductPage} />
-            <PrivateRoute exact path="/admin/product/list/detail/:id" layout={MainLayout} component={ProductDetailPage} />
-            <PrivateRoute exact path="/admin/product/catalog" layout={MainLayout} component={CatalogPage} />
-            <PrivateRoute exact path="/admin/product/inventory" layout={MainLayout} component={InventoryPage} />
-            <PrivateRoute exact path="/admin/product/exportedProducts" layout={MainLayout} component={ExportedProductPage} />
-            <PrivateRoute exact path="/admin/product/importedProducts" layout={MainLayout} component={ImportedProductPage} />
-            <PrivateRoute exact path="/admin/product/delivery" layout={MainLayout} component={DeliveryPage} />
-            <PrivateRoute exact path="/admin/product/salary" layout={MainLayout} component={SalaryPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin" layout={MainLayout} component={DashboardPage} />
+            <PrivateRoute rolePage = 'admin' exact  path="/admin/system/user" layout={MainLayout} component={UserPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/list" layout={MainLayout} component={ProductPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/list/add" layout={MainLayout} component={AddProductPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/list/edit/:id" layout={MainLayout} component={EditProductPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/list/detail/:id" layout={MainLayout} component={ProductDetailPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/catalog" layout={MainLayout} component={CatalogPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/inventory" layout={MainLayout} component={InventoryPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/exportedProducts" layout={MainLayout} component={ExportedProductPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/importedProducts" layout={MainLayout} component={ImportedProductPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/delivery" layout={MainLayout} component={DeliveryPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/product/salary" layout={MainLayout} component={SalaryPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/employ/employs" layout={MainLayout} component={ListEmployPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/system/publicBoard" layout={MainLayout} component={PublicBoardPage} />
+            <PrivateRoute rolePage = 'admin' exact path="/admin/system/apporal" layout={MainLayout} component={ApprovalPage} />
+                    <PrivateRoute rolePage='admin' exact path="/admin/system/configation" layout={MainLayout} component={ConfigurationPage} />
                     
-            <PrivateRoute exact path="/admin/employ/employs" layout={MainLayout} component={ListEmployPage} />
-            <PrivateRoute exact path="/admin/system/publicBoard" layout={MainLayout} component={PublicBoardPage} />
-            <PrivateRoute exact path="/admin/system/apporal" layout={MainLayout} component={ApprovalPage} />
-            <PrivateRoute exact path="/admin/system/configation" layout={MainLayout} component={ConfigurationPage} />
-                
+
+            <PrivateRoute rolePage = 'staff' path="/staff" layout={StaffLayout} component={EmployPage} />
             
-            <Redirect to="/admin" />
+            <Redirect to="/"  />
           </Switch>
         </GAListener>
       </BrowserRouter>

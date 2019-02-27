@@ -91,6 +91,15 @@ class ImportedProductPage extends React.Component {
         const { currentPage} = this.state;
         const { importProduct } = this.props;
         const importProducts = importProduct.importProducts || [];
+        const getSumValueForEmploy = (price) => {
+          
+            const formatter = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0
+            });
+            return formatter.format(price);
+          }
         return (
             <Page
                 title="Hàng nhập"
@@ -127,7 +136,7 @@ class ImportedProductPage extends React.Component {
                                                         <td>{item.name}</td>
                                                         <td>{item.unit}</td>
                                                         <td>{item.amount}</td>
-                                                        <td>{item.totalPrice}</td>
+                                                        <td>{getSumValueForEmploy(item.totalPrice) }</td>
                                                         <td>{item.timeToEnd}</td>
                                             <td>
                                                 <ButtonGroup>

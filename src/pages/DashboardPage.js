@@ -1,91 +1,135 @@
 import React from 'react';
-
-import { getColor } from 'utils/colors';
-
 import {
   Card,
   CardBody,
   CardHeader,
-  CardTitle,
-  CardGroup,
-  CardDeck,
+//   CardGroup,
   Row,
   Col,
-  ListGroup,
-  ListGroupItem,
-  Badge,
-//   Button,
 } from 'reactstrap';
 
 import {
-  MdInsertChart,
-  MdBubbleChart,
-  MdPieChart,
-  MdShowChart,
   MdPersonPin,
-  MdRateReview,
-  MdThumbUp,
-  MdShare,
+//   MdRateReview,
+//   MdThumbUp,
+//   MdShare,
 } from 'react-icons/lib/md';
 
-import InfiniteCalendar from 'react-infinite-calendar';
-
-import { Line, Bar } from 'react-chartjs-2';
-
-import {
-//   supportTicketsData,
-  productsData,
-  userProgressTableData,
-  avatarsData,
-//   todosData,
-  chartjs,
-} from 'demos/dashboardPage';
-import { getStackLineChart, stackLineChartOptions } from 'demos/chartjs';
-
+// import {
+//   productsData,
+// } from 'demos/dashboardPage';
 import Page from 'components/Page';
-
-// import SupportTicket from 'components/SupportTicket';
 import ProductMedia from 'components/ProductMedia';
 import UserProgressTable from 'components/UserProgressTable';
+import {
+    NumberWidget,
+    // IconWidget
+} from 'components/Widget';
 
-// import { AnnouncementCard, TodosCard } from 'components/Card';
-
-import { NumberWidget, IconWidget } from 'components/Widget';
-
-import MapWithBubbles from 'components/MapWithBubbles';
-import HorizontalAvatarList from 'components/HorizontalAvatarList';
-
-const today = new Date();
-const lastWeek = new Date(
-  today.getFullYear(),
-  today.getMonth(),
-  today.getDate() - 7
-);
+import { featchGetUser, featchGetBoard } from '../services/apis/userService';
+import { featchGetProduct } from '../services/apis/productService';
+import { featchGetExportProduct } from '../services/apis/exportProductService';
+import { featchGetImportProduct } from '../services/apis/importProductService';
+import avatar from '../assets/person-icon.png'
 
 class DashboardPage extends React.Component {
-  componentDidMount() {
+    constructor(props) {
+        super(props)
+        this.state = {
+            products: [],
+            users: [],
+            board: [],
+            exportPro: [],
+            importPro : [],
+        }
+    }
+    componentWillMount() {
+      
     // this is needed, because InfiniteCalendar forces window scroll
-    window.scrollTo(0, 0);
+        window.scrollTo(0, 0);
+        featchGetUser().then(result => {
+            // console.log(result)
+            this.setState({ users: result.data });
+        });
+        featchGetProduct().then(result => {
+            this.setState({ products: result.data });
+        });
+        featchGetBoard().then(result => {
+            this.setState({ board: result.data });
+        });
+        featchGetExportProduct().then(result => {
+            this.setState({ exportPro: result.data });
+        })
+        featchGetImportProduct().then(result => {
+            this.setState({ importPro: result.data });
+        })
   }
 
   render() {
-    const primaryColor = getColor('primary');
-    const secondaryColor = getColor('secondary');
 
+      const { products, users=[] ,board,importPro,exportPro} = this.state;
+      const getSumValueForEmploy = (price) => {
+          
+        const formatter = new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            minimumFractionDigits: 0
+        });
+        return formatter.format(price);
+      }
+      
+    const getSumValueForEmploy1 = (obj) => {
+        let sum = 0;
+        const formatter = new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            minimumFractionDigits: 0
+        });
+        obj.forEach(item => {
+            sum += item.amount * item.productId.price;
+        });
+
+        return formatter.format(sum);
+    }
+      const newUsers = users.map(item => {
+          return {
+              avatar: avatar,
+              name: item.lastName + ' ' + item.firstName,
+              date: item.dob,
+              gender: item.gender
+              //   progress
+          }
+      });
+      const newBoard = board.map(item => {
+          return {
+            avatar: avatar,
+            name: item.user.lastName + ' ' + item.user.firstName,
+            date: item.user.dob,
+              gender: item.user.gender,
+            total:getSumValueForEmploy1(item.productUser)
+          }
+      })
+      const getSum = (arr) => {
+          let sum = 0;
+          arr.forEach(item => {
+              sum += item.totalPrice;
+          });
+          return sum;
+      }
     return (
       <Page
         className="DashboardPage"
-        title="Dashboard"
-        breadcrumbs={[{ name: 'Dashboard', active: true }]}>
+        title="Bảng thống kê"
+        breadcrumbs={[{ name: 'Bảng thống kê', active: true }]}>
         <Row>
           <Col lg={3} md={6} sm={6} xs={12}>
             <NumberWidget
               title="Tổng thu"
               subtitle="Tháng 2"
-              number="100.000.000"
+              number={getSumValueForEmploy(getSum(exportPro))}
               color="secondary"
               progress={{
-                value: 75,
+                value: 100,
                 label: 'Tháng 1',
               }}
             />
@@ -95,10 +139,10 @@ class DashboardPage extends React.Component {
             <NumberWidget
               title="Tổng chi"
               subtitle="Tháng 2"
-              number="500.000.000"
+              number={getSumValueForEmploy(getSum(importPro))}
               color="secondary"
               progress={{
-                value: 60,
+                value: 100,
                 label: 'Tháng 1',
               }}
             />
@@ -108,10 +152,10 @@ class DashboardPage extends React.Component {
             <NumberWidget
               title="Số nhân viên"
               subtitle="Tháng 2"
-              number="50"
+              number={users.length}
               color="secondary"
               progress={{
-                value: 90,
+                value: 100,
                 label: 'Tháng 1',
               }}
             />
@@ -121,57 +165,16 @@ class DashboardPage extends React.Component {
             <NumberWidget
               title="Số  sản phẩm"
               subtitle="Tháng 2"
-              number="77%"
+              number={products.length}
               color="secondary"
               progress={{
-                value: 60,
+                value: 100,
                 label: 'Tháng 1',
               }}
             />
           </Col>
         </Row>
-
-        <Row>
-          <Col lg="8" md="12" sm="12" xs="12">
-            <Card>
-              <CardHeader>
-                Doanh thu
-                <small className="text-muted text-capitalize">Năm này</small>
-              </CardHeader>
-              <CardBody>
-                <Line data={chartjs.line.data} options={chartjs.line.options} />
-              </CardBody>
-            </Card>
-          </Col>
-
-          <Col lg="4" md="12" sm="12" xs="12">
-            <Card>
-              <CardHeader>Tổng chi phí</CardHeader>
-              <CardBody>
-                <Bar data={chartjs.bar.data} options={chartjs.bar.options} />
-              </CardBody>
-              <ListGroup flush>
-                <ListGroupItem>
-                  <MdInsertChart size={25} color={primaryColor} /> Cost of sales{' '}
-                  <Badge color="secondary">$3000</Badge>
-                </ListGroupItem>
-                <ListGroupItem>
-                  <MdBubbleChart size={25} color={primaryColor} /> Management
-                  costs <Badge color="secondary">$1200</Badge>
-                </ListGroupItem>
-                <ListGroupItem>
-                  <MdShowChart size={25} color={primaryColor} /> Financial costs{' '}
-                  <Badge color="secondary">$800</Badge>
-                </ListGroupItem>
-                <ListGroupItem>
-                  <MdPieChart size={25} color={primaryColor} /> Other operating
-                  costs <Badge color="secondary">$2400</Badge>
-                </ListGroupItem>
-              </ListGroup>
-            </Card>
-          </Col>
-        </Row>
-
+{/* 
         <CardGroup style={{ marginBottom: '1rem' }}>
           <IconWidget
             bgColor="white"
@@ -194,21 +197,21 @@ class DashboardPage extends React.Component {
             title="30+ Shares"
             subtitle="New Shares"
           />
-        </CardGroup>
+        </CardGroup> */}
 
         <Row>
           <Col md="6" sm="12" xs="12">
             <Card>
               <CardHeader>Sản phẩm mới</CardHeader>
               <CardBody>
-                {productsData.map(
-                  ({ id, image, title, description, right }) => (
-                    <ProductMedia
-                      key={id}
-                      image={image}
-                      title={title}
-                      description={description}
-                      right={right}
+                {products.slice(0,5).map(
+                    ( item ) => (
+                        <ProductMedia
+                      key={item._id}
+                      image={item.mainImage}
+                      title={item.name}
+                      description={item.description}
+                      right={getSumValueForEmploy(item.price)}
                     />
                   )
                 )}
@@ -223,12 +226,12 @@ class DashboardPage extends React.Component {
                 <UserProgressTable
                   headers={[
                     <MdPersonPin size={25} />,
-                    'name',
-                    'date',
-                    'participation',
+                    'Họ tên',
+                    'Ngày sinh',
+                    'Giới tính',
                     '%',
                   ]}
-                  usersData={userProgressTableData}
+                  usersData={newUsers}
                 />
               </CardBody>
             </Card>
@@ -239,14 +242,14 @@ class DashboardPage extends React.Component {
             <Card>
               <CardHeader>Sản phẩm bán chạy</CardHeader>
               <CardBody>
-                {productsData.map(
-                  ({ id, image, title, description, right }) => (
-                    <ProductMedia
-                      key={id}
-                      image={image}
-                      title={title}
-                      description={description}
-                      right={right}
+              {products.slice(0,5).map(
+                    ( item ) => (
+                        <ProductMedia
+                      key={item._id}
+                      image={item.mainImage}
+                      title={item.name}
+                      description={item.description}
+                      right={getSumValueForEmploy(item.price)}
                     />
                   )
                 )}
@@ -261,153 +264,19 @@ class DashboardPage extends React.Component {
                 <UserProgressTable
                   headers={[
                     <MdPersonPin size={25} />,
-                    'name',
-                    'date',
-                    'participation',
-                    '%',
+                    'Họ tênn',
+                    'Ngày sinh',
+                    'Giới tính',
+                    'Tổng lương',
                   ]}
-                  usersData={userProgressTableData}
+                                usersData={newBoard.sort((a,b) => {
+                                    return a.total > b.total;
+                  })}
                 />
               </CardBody>
             </Card>
           </Col>
         </Row>
-
-        <Row>
-          <Col lg={4} md={4} sm={12} xs={12}>
-            <Card>
-              <Line
-                data={getStackLineChart({
-                  labels: [
-                    'Tháng 1',
-                    'Tháng 2',
-                    'Tháng 3',
-                    'Tháng 4',
-                    'Tháng 5',
-                    'Tháng 6',
-                    'Tháng 7',
-                  ],
-                  data: [0, 13000, 5000, 24000, 16000, 25000, 10000],
-                })}
-                options={stackLineChartOptions}
-              />
-              <CardBody
-                className="text-primary"
-                style={{ position: 'absolute' }}>
-                <CardTitle>
-                  <MdInsertChart /> Sales
-                </CardTitle>
-              </CardBody>
-            </Card>
-          </Col>
-
-          <Col lg={4} md={4} sm={12} xs={12}>
-            <Card>
-              <Line
-                data={getStackLineChart({
-                  labels: [
-                    'Tháng 1',
-                    'Tháng 2',
-                    'Tháng 3',
-                    'Tháng 4',
-                    'Tháng 5',
-                    'Tháng 6',
-                    'Tháng 7',
-                  ],
-                  data: [10000, 15000, 5000, 10000, 5000, 10000, 10000],
-                })}
-                options={stackLineChartOptions}
-              />
-              <CardBody
-                className="text-primary"
-                style={{ position: 'absolute' }}>
-                <CardTitle>
-                  <MdInsertChart /> Revenue
-                </CardTitle>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col lg={4} md={4} sm={12} xs={12}>
-            <Card>
-              <Line
-                data={getStackLineChart({
-                  labels: [
-                    'Tháng 1',
-                    'Tháng 2',
-                    'Tháng 3',
-                    'Tháng 4',
-                    'Tháng 5',
-                    'Tháng 6',
-                    'Tháng 7',
-                  ],
-                  data: [0, 13000, 5000, 24000, 16000, 25000, 10000].reverse(),
-                })}
-                options={stackLineChartOptions}
-              />
-              <CardBody
-                className="text-primary"
-                style={{ position: 'absolute', right: 0 }}>
-                <CardTitle>
-                  <MdInsertChart /> Profit
-                </CardTitle>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col lg="4" md="12" sm="12" xs="12">
-            <InfiniteCalendar
-              selected={today}
-              minDate={lastWeek}
-              width="100%"
-              theme={{
-                accentColor: primaryColor,
-                floatingNav: {
-                  background: secondaryColor,
-                  chevron: primaryColor,
-                  color: '#FFF',
-                },
-                headerColor: primaryColor,
-                selectionColor: secondaryColor,
-                textColor: {
-                  active: '#FFF',
-                  default: '#333',
-                },
-                todayColor: secondaryColor,
-                weekdayColor: primaryColor,
-              }}
-            />
-          </Col>
-
-          <Col lg="8" md="12" sm="12" xs="12">
-            <Card inverse className="bg-gradient-primary">
-              <CardHeader className="bg-gradient-primary">
-                Map with bubbles
-              </CardHeader>
-              <CardBody>
-                <MapWithBubbles />
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-
-        <CardDeck style={{ marginBottom: '1rem' }}>
-          <Card body style={{ overflowX: 'auto' }}>
-            <HorizontalAvatarList
-              avatars={avatarsData}
-              avatarProps={{ size: 50 }}
-            />
-          </Card>
-
-          <Card body style={{ overflowX: 'auto' }}>
-            <HorizontalAvatarList
-              avatars={avatarsData}
-              avatarProps={{ size: 50 }}
-              reversed
-            />
-          </Card>
-        </CardDeck>
 
       </Page>
     );

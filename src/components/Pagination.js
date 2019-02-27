@@ -7,25 +7,26 @@ import {
 class PaginationTable extends React.Component {
     state = {
         pages: 0,
-
     }
     componentWillUpdate(props) {
 
         if (this.props !== props) {
-            const { data, entry } = props;
+            const { data = [], entry } = props;
             this.setState({ pages: Math.ceil(data.length / entry) });
         }
     }
     showPagi = () => {
         let arrPagiItem = [];
 
-        for (let i = 0; i < this.state.pages; i++) {
-            arrPagiItem.push(<PaginationItem key={i} active={(i) === this.props.currentPage ? true : false} onClick={() => this.props.handleChangePage(i)}>
-                <PaginationLink>
-                    {i + 1}
-                </PaginationLink>
-            </PaginationItem>);
-        }
+        if (this.state.pages !== 0) {
+            for (let i = 0; i < this.state.pages; i++) {
+                arrPagiItem.push(<PaginationItem key={i} active={(i) === this.props.currentPage ? true : false} onClick={() => this.props.handleChangePage(i)}>
+                    <PaginationLink>
+                        {i + 1}
+                    </PaginationLink>
+                </PaginationItem>);
+            }
+       }
         return arrPagiItem;
     }
     render() {

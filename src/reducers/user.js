@@ -6,7 +6,11 @@ const user = (state = initState, action) => {
         case LOGIN_SUCCESS:
             localStorage.setItem('jwt', action.data.token);
             localStorage.setItem('phone', action.data.phone);
-            return [...state];
+            // console.log(action.data)
+            localStorage.setItem('name', action.data.name);
+            localStorage.setItem('id', action.data.id);
+            localStorage.setItem('role', action.data.role);
+            return {role:action.data.role}
         case USER_GET_SUCCESS:
             state.users = action.data;
             return {

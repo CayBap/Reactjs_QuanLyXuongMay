@@ -1,21 +1,66 @@
 import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux'
-import { Col, Row, Table, Card, CardBody, CardHeader,Button,ButtonGroup } from 'reactstrap';
+import { Col, Row, Table, Card, CardBody, CardHeader,CardFooter } from 'reactstrap';
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
+import {featchGetBoard} from '../../services/apis/userService';
+import PaginationTable from '../../components/Pagination';
 const bem = bn.create('user');
 
 class SalaryPage extends React.Component {
-   
+    constructor(props) {
+        super(props)
+        this.state = {
+            board: [],
+            entry: 5,
+            currentPage: 0,
+        }
+    }
+    componentWillMount() {
+        featchGetBoard().then(result => {
+            console.log(result);
+            if (result.status === 200) {
+                this.setState({ board: result.data });
+            }
+        })
+    }
+    handleChangePage = (page) => {
+        const {entry } = this.state;
+        this.setState({ dataForPage: this.state.board.slice(page*entry, page*entry+entry),currentPage:page});
+    }
+    
     render() {
+        const { board } = this.state;
+        const getSumValue = (obj) => {
+            let sum = 0;
+            obj.forEach(item => {
+                sum += item.amount;
+            })
+            return sum;
+        }
+        const getSumValueForEmploy = (obj) => {
+            let sum = 0;
+            const formatter = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                minimumFractionDigits: 0
+            });
+            obj.forEach(item => {
+                // console.log(item.amount,item.productUser.price)
+                sum += item.amount * item.productId.priceForEmploy;
+            });
+            // console.log(sum)
+            return formatter.format(sum);
+        }
+        console.log(board)
         return (
             <Page
                 // className="DashboardPage"
                 title="Lương nhân viên"
                 breadcrumbs={[{ name: 'Hệ thống', active: false }, { name: 'Lương nhân viên', active: true }]}>
                 <Row>
-                    <Col lg={8} md={6} sm={6} xs={12}>
+                    <Col lg={12} md={6} sm={6} xs={12}>
                         <Card>
                             <CardHeader>
                                 Danh sách người dùng
@@ -26,64 +71,38 @@ class SalaryPage extends React.Component {
                                         <tr>
                                             <th>#</th>
                                             <th>Họ tên</th>
-                                            <th>Vai trò</th>
-                                            <th style = {{width:200}}>Thao tác</th>
+                                            <th>Sô lô </th>
+                                            <th>Số sản phẩm</th>
+                                            <th>Tổng lương</th>
                                         </tr>
                                     </thead>
                                     <tbody >
-                                        <tr  className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td>Đỗ Hoa</td>
-                                            <td>Quản trị</td>
-                                            <td>
-                                                <ButtonGroup>
-                                                    <Button color = "info">Sửa</Button>
-                                                    <Button color = "warning">Khóa</Button>
-                                                    <Button color = "danger">Xóa</Button>
-                                                </ButtonGroup>
-                                            </td>
-                                        </tr>
                                        
+                                        {
+                                            board.slice(this.state.currentPage * this.state.entry, this.state.currentPage* this.state.entry + this.state.entry).map(item => {
+                                              
+                                                return (
+                                                    <tr key = {item.user._id
+                                                    }  className = {bem.e('row')}>
+                                                    <th scope="row">1</th>
+                                                        <td>{item.user.lastName + " "+item.user.firstName}</td>
+                                                        <td>{item.productUser.length}</td>
+                                                        <td>{
+                                                            getSumValue(item.productUser)
+                                                            // console.log(item)
+                                                        }</td>
+                                                        <td>{getSumValueForEmploy(item.productUser)}</td>
+                                                    {/* <td>{item.productUser.length}</td> */}
+                                                </tr>
+                                                )
+                                            })
+                                        }
                                     </tbody>
                                 </Table>
                             </CardBody>
-                        </Card>
-                    </Col>
-                    <Col lg={4} md={6} sm={6} xs={12}>
-                    <Card>
-                            <CardHeader>
-                                Top doanh thu
-                        </CardHeader>
-                            <CardBody>
-                                <Table bordered>
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Họ tên</th>
-                                            <th>Doanh thu</th>
-                                           
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td>Đỗ Thắng</td>
-                                            <td>10 triệu</td>
-                                        </tr>
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td>Đỗ Thắng</td>
-                                            <td>10 triệu</td>
-                                        </tr>
-                                        <tr className = {bem.e('row')}>
-                                            <th scope="row">1</th>
-                                            <td>Đỗ Thắng</td>
-                                            <td>10 triệu</td>
-                                        </tr>
-                                       
-                                    </tbody>
-                                </Table>
-                            </CardBody>
+                            <CardFooter>
+                            <PaginationTable data={board} entry={this.state.entry} currentPage={this.state.currentPage} handleChangePage={this.handleChangePage}/>
+                            </CardFooter>
                         </Card>
                     </Col>
                 </Row>
