@@ -33,8 +33,9 @@ const sidebarBackground = {
 
 const navContents = [
   { to: '/admin/system/user', name: 'Người dùng', exact: false, Icon: MdTextFields },
-//   { to: '/admin/system/role', name: 'Vai trò', exact: false, Icon: MdBorderAll },
-//   { to: '/admin/system/noti', name: 'Thông báo', exact: false, Icon: MdBorderAll },
+  { to: '/admin/system/role', name: 'Phân quyền', exact: false, Icon: '' },
+  { to: '/admin/system/general', name: 'Thiết lập chung', exact: false, Icon: '' },
+  { to: '/admin/system/userInfo', name: 'Thông tin cá nhân', exact: false, Icon: '' },
 ];
 // const emmployContents = [
 //   { to: '/admin/employ/employs', name: 'Danh sách nhân viên', exact: false, Icon: MdTextFields },
@@ -117,7 +118,7 @@ class Sidebar extends React.Component {
       <aside className={bem.b()}>
         <div className={bem.e('background')} style={sidebarBackground} />
         <div className={bem.e('content')}>
-          <Navbar>
+          <Navbar style = {{display:'flex',justifyContent:'center',marginTop:20}}>
             {/* <SourceLink className="navbar-brand d-flex"> */}
               {/* <img
                 src={logo200Image}
@@ -126,9 +127,9 @@ class Sidebar extends React.Component {
                 className="pr-2"
                 alt=""
               /> */}
-              <span className="text-white">
+              <h3 className="text-white">
                 Quản lý xưởng may
-              </span>
+              </h3>
             {/* </SourceLink> */}
           </Navbar>
           <Nav vertical>

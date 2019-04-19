@@ -10,6 +10,7 @@ import product from './product';
 import importProduct from './importProduct';
 import exportProduct from './exportProduct';
 import delivery from './delivery';
+import role from './role';
 
 /**
  * Merges the main reducer with the router state and dynamically injected reducers
@@ -22,6 +23,7 @@ export default function createReducer(injectedReducers = {}) {
       importProduct,
       exportProduct,
       delivery,
+      role,
     ...injectedReducers,
   });
 

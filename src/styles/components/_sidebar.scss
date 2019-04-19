@@ -39,9 +39,9 @@
   &::after {
     z-index: 3;
     // sublime light
-    background: #fc5c7d; /* fallback for old browsers */
+    // background: #fc5c7d; /* fallback for old browsers */
     background: linear-gradient(to bottom, #00BCD4, #00BCD4);
-    opacity: 1;
+    opacity: 0.3;
   }
 
   &[data-image]:after {

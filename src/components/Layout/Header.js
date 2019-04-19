@@ -152,7 +152,8 @@ class Header extends React.Component {
                   className="border-light">
                   <ListGroup flush>
                     <ListGroupItem tag="button" action className="border-light">
-                      <MdPersonPin /> Thông tin cá nhân
+                      <MdPersonPin /> 
+                      <Link to='/admin/system/userInfo'> Thông tin cá nhân</Link>
                     </ListGroupItem>
                     <ListGroupItem tag="button" action className="border-light">
                       <MdHelp /> Giúp đỡ

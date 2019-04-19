@@ -1,7 +1,7 @@
 import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux'
-import { Col, Row, Table, Card, CardBody, CardHeader,CardFooter } from 'reactstrap';
+import { Col, Row, Table, Card, CardBody, CardHeader,CardFooter ,Button} from 'reactstrap';
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
 import {featchGetBoard} from '../../services/apis/userService';
@@ -15,11 +15,13 @@ class SalaryPage extends React.Component {
             board: [],
             entry: 5,
             currentPage: 0,
+            // userId,
+            // month,
+            // year,
         }
     }
     componentWillMount() {
         featchGetBoard().then(result => {
-            console.log(result);
             if (result.status === 200) {
                 this.setState({ board: result.data });
             }
@@ -53,7 +55,6 @@ class SalaryPage extends React.Component {
             // console.log(sum)
             return formatter.format(sum);
         }
-        console.log(board)
         return (
             <Page
                 // className="DashboardPage"
@@ -74,17 +75,17 @@ class SalaryPage extends React.Component {
                                             <th>Sô lô </th>
                                             <th>Số sản phẩm</th>
                                             <th>Tổng lương</th>
+                                            <th>Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody >
-                                       
                                         {
-                                            board.slice(this.state.currentPage * this.state.entry, this.state.currentPage* this.state.entry + this.state.entry).map(item => {
+                                            board.slice(this.state.currentPage * this.state.entry, this.state.currentPage* this.state.entry + this.state.entry).map((item,index) => {
                                               
                                                 return (
                                                     <tr key = {item.user._id
                                                     }  className = {bem.e('row')}>
-                                                    <th scope="row">1</th>
+                                                    <th scope="row">{index+1+this.state.currentPage*this.state.entry}</th>
                                                         <td>{item.user.lastName + " "+item.user.firstName}</td>
                                                         <td>{item.productUser.length}</td>
                                                         <td>{
@@ -92,6 +93,7 @@ class SalaryPage extends React.Component {
                                                             // console.log(item)
                                                         }</td>
                                                         <td>{getSumValueForEmploy(item.productUser)}</td>
+                                                        <td style = {{width:100}}><Button>Xuất bảng lương</Button></td>
                                                     {/* <td>{item.productUser.length}</td> */}
                                                 </tr>
                                                 )

@@ -10,33 +10,58 @@ export const featchCreateUser = (body) => {
 export const featchGetUser = () => {
     return axios.get(USER,{
         
-        method: 'GET',
+
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     })
 }
 export const featchGetAUser = (id) => {
     return axios.get(`${USER}/${id}`,{
-        method: 'GET',
+
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     });
    
-}
+} 
+
 export const featchGetBoard = () => {
     return axios.get(`${USER}/boardEmploy` ,{
-        method: 'GET',
+
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     });
 }
 export const featchUpdateUser = (id, body) => {
     console.log(body)
     return axios.put(`${USER}/${id}`,body ,{
-        method: 'GET',
+
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     });
 }
 export const featchDeleteUser = (id) => {
     return axios.delete(`${USER}/${id}`,{
-        method: 'GET',
+
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     } );
+}
+export const featchProfile = () => {
+    return axios.get(`${USER}/profile`,{
+
+        headers: { 'x-access-token': localStorage.getItem('jwt') },
+    } );
+}
+export const featchUpdateProfile = (body) => {
+    const formData = new FormData();
+    formData.append("avatar", body.avatar);
+    formData.append("name", body.name);
+    formData.append("firstName", body.firstName);
+    formData.append("lastName", body.lastName);
+    formData.append("adress", body.adress);
+    formData.append("phone", body.phone);
+    formData.append("gender", body.gender);
+    formData.append("email", body.email);
+    formData.append("dob", body.dob);
+    return axios.put(`${USER}/profile`, formData, {
+        headers: {
+            'x-access-token': localStorage.getItem('jwt'),
+            'Content-Type': 'multipart/form-data',
+        },
+    });
 }

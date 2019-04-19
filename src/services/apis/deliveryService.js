@@ -40,7 +40,6 @@ export const featchDeleteDelivery = (id) => {
 }
 export const featchUpdateStatusDelivery = (id) => {
     return axios.patch(`${DELIVERY}/${id}`,{
-        method: 'GET',
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     });
 }

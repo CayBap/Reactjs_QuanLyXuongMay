@@ -28,7 +28,9 @@ import AddProductPage from './pages/product/AddProductPage';
 import EditProductPage from './pages/product/EditProductPage';
 import EmployPage from './pages/EmployPage';
 import StaffLayout from './components/Layout/StaffLayout';
-
+import RolePage from './pages/RolePage'
+import SystemConfigPage from './pages/SystemConfigPage';
+import UserInfoPage from './pages/UserInfoPage';
 const getBasename = () => {
   return `/${process.env.PUBLIC_URL.split('/').pop()}`;
 };
@@ -86,7 +88,10 @@ class App extends React.Component {
             <PrivateRoute rolePage = 'admin' exact path="/admin/employ/employs" layout={MainLayout} component={ListEmployPage} />
             <PrivateRoute rolePage = 'admin' exact path="/admin/system/publicBoard" layout={MainLayout} component={PublicBoardPage} />
             <PrivateRoute rolePage = 'admin' exact path="/admin/system/apporal" layout={MainLayout} component={ApprovalPage} />
-                    <PrivateRoute rolePage='admin' exact path="/admin/system/configation" layout={MainLayout} component={ConfigurationPage} />
+            <PrivateRoute rolePage='admin' exact path="/admin/system/configation" layout={MainLayout} component={ConfigurationPage} />
+            <PrivateRoute rolePage='admin' exact path="/admin/system/role" layout={MainLayout} component={RolePage} />
+            <PrivateRoute rolePage='admin' exact path="/admin/system/general" layout={MainLayout} component={SystemConfigPage} />
+            <PrivateRoute rolePage='admin' exact path="/admin/system/userInfo" layout={MainLayout} component={UserInfoPage} />
                     
 
             <PrivateRoute rolePage = 'staff' path="/staff" layout={StaffLayout} component={EmployPage} />
