@@ -22,9 +22,11 @@ export const featchGetAUser = (id) => {
    
 } 
 
-export const featchGetBoard = () => {
+export const featchGetBoard = (from,to) => {
     return axios.get(`${USER}/boardEmploy` ,{
-
+        params: { 
+            from,to  
+          },
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     });
 }
@@ -44,6 +46,14 @@ export const featchDeleteUser = (id) => {
 export const featchProfile = () => {
     return axios.get(`${USER}/profile`,{
 
+        headers: { 'x-access-token': localStorage.getItem('jwt') },
+    } );
+}
+export const featchExport = (idUser,from,to) => {
+    return axios.get(`${USER}/export/${idUser}`,{
+        params: { 
+         from,to  
+       },
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     } );
 }
