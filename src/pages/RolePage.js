@@ -10,6 +10,10 @@ import {
     MdError,
     // MdCardGiftcard,
     MdInfo,
+    MdEdit,
+    MdDelete,
+    MdAdd,
+    MdImportExport,
   } from 'react-icons/lib/md';
 import Page from '../components/Page';
 import bn from 'utils/bemnames';
@@ -18,6 +22,77 @@ import { featchGetRole, featchCreateRole, featchDeleteRole, featchUpdateRole } f
 import { actGetRoleSuccess } from '../actions/roleAct';
 const bem = bn.create('user');
 
+const permistion = [
+    {
+        name: 'Người dùng',
+        code: 'PM1',
+        action: ['add', 'update', 'delete'],
+    },
+    {
+        name: 'Phân quyền',
+        code: 'PM2',
+        action: ['add', 'update', 'delete'],
+    },
+    {
+        name: 'Thiết lập chung',
+        code: 'PM3',
+        action: ['add', 'update', 'delete'],
+    },
+    
+    {
+        name: 'Sản phẩm',
+        code: 'PM4',
+        action: ['add', 'update', 'delete'],
+    },
+    
+    {
+        name: 'Danh mục',
+        code: 'PM5',
+        action: ['add', 'update', 'delete'],
+    },
+    
+    {
+        name: 'Tồn kho',
+        code: 'PM6',
+        action: ['add', 'update', 'delete'],
+    },
+    {
+        name: 'Hàng nhập',
+        code: 'PM7',
+        action: ['add', 'update', 'delete'],
+    },
+    {
+        name: 'Hàng xuất',
+        code: 'PM8',
+        action: ['add', 'update', 'delete'],
+    },
+    {
+        name: 'Hàng giao nhân viên',
+        code: 'PM9',
+        action: ['add', 'update', 'delete'],
+    },
+    {
+        name: 'Lương nhân viên',
+        code: 'PM10',
+        action: ['export'],
+    },
+    
+];
+const getIcon = (item)=>{
+    if (item === 'add') { 
+        return <MdAdd title='Thêm mới' style = {{color:'green'}}></MdAdd>;
+    }
+    if (item === 'update') { 
+        return <MdEdit title='Chỉnh sửa' style = {{color:'orange'}}></MdEdit>;
+    }
+    if (item === 'delete') { 
+        return <MdDelete title='Xóa' style = {{color:'red'}}></MdDelete>;
+    }
+    if (item === 'export') { 
+        return <MdImportExport title='Xuất hóa đơn' style = {{color:'red'}}></MdImportExport>;
+    }
+    return item;
+}
 class RolePage extends React.Component {
     constructor(props) {
         super(props);
@@ -65,10 +140,27 @@ class RolePage extends React.Component {
 
     handleSubmitCreate = e => {
         e.preventDefault();
-        const { name,parrent,description } = this.state;
+        const { name, parrent, description } = this.state;
+        let permistion = [];
+        document.querySelectorAll('.role-check').forEach(item => {
+            const action = [];
+            item.querySelectorAll('input').forEach(item => {
+                if (item.checked) { 
+                    action.push(item.value);
+                }
+            });
+            if (action.length !== 0) { 
+                permistion.push({
+                    name: item.querySelector('b').textContent,
+                    code: item.id,
+                    action: action,
+                });
+            }
+           
+        });
         if (name !== "") {
             const body = {
-                name,parrent,description
+                name,parrent,description,permistion,
             }
             if (this.state.state === 'add') {
                 featchCreateRole(body).then(result => {
@@ -192,7 +284,6 @@ class RolePage extends React.Component {
                                         <tr>
                                             <th>#</th>
                                             <th>Tên vai trò</th>
-                                            <th>Quyền cha</th>
                                             <th>Slug</th>
                                             <th>Trạng thái</th>
                                             <th style = {{width:200}}>Thao tác</th>
@@ -206,7 +297,6 @@ class RolePage extends React.Component {
                                                 <tr  key = {item._id} className = {bem.e('row')} >
                                                     <th scope="row">{index+1}</th>
                                                     <td>{item.name}</td>
-                                                    <td>{item.parrent?item.parrent.name:''}</td>
                                                     <td>{item.slug}</td>
                                                     <td>{item.isLocked?'Đã khóa':'Hoạt động'}</td>
                                                     <td>
@@ -237,7 +327,7 @@ class RolePage extends React.Component {
                                 <Label for="phone">Tên vai trò</Label>
                                 <Input required value = {this.state.name} onChange = {this.handleChageInput}  type="text" name="name" id="name" placeholder="Tên vai trò" />
                             </FormGroup>
-                            
+{/*                             
                             <FormGroup>
                                 <Label for="gender">Thuộc vai trò</Label>
                                 <Input  value={this.state.parrent} onChange={this.handleChageInput} type="select" name="parrent" id="parrent" >
@@ -250,7 +340,7 @@ class RolePage extends React.Component {
                                         })
                                     }
                                 </Input>
-                            </FormGroup>
+                            </FormGroup> */}
                             <FormGroup>
                                 <Label for="gender">Trạng thái</Label>
                                 <Input  value={this.state.isLocked} onChange={this.handleChageInput} type="select" name="isLocked" id="isLocked" >
@@ -260,6 +350,30 @@ class RolePage extends React.Component {
                                    
                                 </Input>
                             </FormGroup>
+                            <Row>
+                                <Col >
+                                    {
+                                        permistion.map(item => { 
+                                            return (
+                                                <div className='role-check' id={item.code} key={item.code} style={{display:'flex',justifyContent:'space-between'}}>
+                                                    <b>{item.name}</b>
+                                                    <div style = {{width:'40%'}}>
+                                                    {item.action.map(element => { 
+                                                        return (
+                                                            <FormGroup  check inline key={element}>
+                                                            <Label check>
+                                                                <Input className = {element} type="checkbox" value = {element} /> {getIcon(element)}
+                                                            </Label>
+                                                            </FormGroup>
+                                                        )
+                                                    })}
+                                                   </div>
+                                                </div>
+                                            )
+                                        })
+                                    }
+                                </Col>
+                            </Row>
                             <FormGroup>
                                 <Label for="role">Mô tả</Label>
                                 <Input  value={this.state.description} onChange={this.handleChageInput} type="textarea" name="description" id="description" >

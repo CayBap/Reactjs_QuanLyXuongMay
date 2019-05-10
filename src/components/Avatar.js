@@ -3,8 +3,8 @@ import PropTypes from 'utils/propTypes';
 
 import classNames from 'classnames';
 
-import userImage from 'assets/person-icon.png';
-
+// import userImage from 'assets/person-icon.png';
+const userImage = 'http://localhost:4040/static/company/' + localStorage.getItem('avatar');
 const Avatar = ({
   rounded,
   circle,

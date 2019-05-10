@@ -5,7 +5,9 @@ const user = (state = initState, action) => {
     switch (action.type) {
         case LOGIN_SUCCESS:
             localStorage.setItem('jwt', action.data.token);
+            localStorage.setItem('avatar', action.data.avatar);
             localStorage.setItem('phone', action.data.phone);
+            localStorage.setItem('permistion', JSON.stringify(action.data.permistion?action.data.permistion.permistion:null));
             // console.log(action.data)
             localStorage.setItem('name', action.data.name);
             localStorage.setItem('id', action.data.id);

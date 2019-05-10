@@ -31,7 +31,7 @@ import { featchGetProduct } from '../services/apis/productService';
 import { featchGetExportProduct } from '../services/apis/exportProductService';
 import { featchGetImportProduct } from '../services/apis/importProductService';
 import avatar from '../assets/person-icon.png'
-
+// const avatar = 'http://localhost:4040/static/'+localStorage.getItem('avatar');
 class DashboardPage extends React.Component {
     constructor(props) {
         super(props)
@@ -106,7 +106,7 @@ class DashboardPage extends React.Component {
             name: item.user.lastName + ' ' + item.user.firstName,
             date: item.user.dob,
               gender: item.user.gender,
-            total:getSumValueForEmploy1(item.productUser)
+              total: getSumValueForEmploy1(item.productUser),
           }
       })
       const getSum = (arr) => {
@@ -125,12 +125,12 @@ class DashboardPage extends React.Component {
           <Col lg={3} md={6} sm={6} xs={12}>
             <NumberWidget
               title="Tổng thu"
-              subtitle="Tháng 2"
+              subtitle="Tháng sau"
               number={getSumValueForEmploy(getSum(exportPro))}
               color="secondary"
               progress={{
                 value: 100,
-                label: 'Tháng 1',
+                label: 'Tháng trước',
               }}
             />
           </Col>
@@ -138,12 +138,12 @@ class DashboardPage extends React.Component {
           <Col lg={3} md={6} sm={6} xs={12}>
             <NumberWidget
               title="Tổng chi"
-              subtitle="Tháng 2"
+              subtitle="Tháng sau"
               number={getSumValueForEmploy(getSum(importPro))}
               color="secondary"
               progress={{
                 value: 100,
-                label: 'Tháng 1',
+                label: 'Tháng trước',
               }}
             />
           </Col>
@@ -151,12 +151,12 @@ class DashboardPage extends React.Component {
           <Col lg={3} md={6} sm={6} xs={12}>
             <NumberWidget
               title="Số nhân viên"
-              subtitle="Tháng 2"
+              subtitle="Tháng sau"
               number={users.length}
               color="secondary"
               progress={{
                 value: 100,
-                label: 'Tháng 1',
+                label: 'Tháng trước',
               }}
             />
           </Col>
@@ -164,12 +164,12 @@ class DashboardPage extends React.Component {
           <Col lg={3} md={6} sm={6} xs={12}>
             <NumberWidget
               title="Số  sản phẩm"
-              subtitle="Tháng 2"
+              subtitle="Tháng sau"
               number={products.length}
               color="secondary"
               progress={{
                 value: 100,
-                label: 'Tháng 1',
+                label: 'Tháng trước',
               }}
             />
           </Col>
@@ -269,8 +269,8 @@ class DashboardPage extends React.Component {
                     'Giới tính',
                     'Tổng lương',
                   ]}
-                                usersData={newBoard.sort((a,b) => {
-                                    return a.total > b.total;
+                                usersData={newBoard.sort((a, b) => {
+                                    return parseFloat(a.total) > parseFloat(b.total);
                   })}
                 />
               </CardBody>

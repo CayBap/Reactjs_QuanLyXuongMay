@@ -2,11 +2,8 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux'
 import { Col, Row, Table, Card, CardBody, CardHeader,Button,ButtonGroup ,CardFooter,
-   Modal, ModalHeader, ModalBody, ModalFooter,
-    Form,FormGroup,Label,Input
+
 } from 'reactstrap';
-import Select from 'react-select';
-import NotificationSystem from 'react-notification-system';
 import {
     MdError,
     // MdCardGiftcard,
@@ -15,12 +12,39 @@ import {
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
 import PaginationTable from '../../components/Pagination';
-import { featchGetExportProduct, featchCreateExportProduct, featchDeleteExportProduct, featchUpdateExportProduct } from '../../services/apis/exportProductService';
+import { featchGetExportProduct, featchCreateExportProduct, featchUpdateExportProduct } from '../../services/apis/exportProductService';
 import { featchGetProduct } from '../../services/apis/productService';
+import { featchGetCompany } from '../../services/apis/companyService';
 import { actGetExportProductSuccess } from '../../actions/exportProductAct';
 import { actGetProductSuccess } from '../../actions/productAct';
 const bem = bn.create('product');
-
+const now = new Date();
+const formatValue = (value) => {
+    const formatter = new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        minimumFractionDigits: 0
+    });
+   
+    // console.log(sum)
+    return formatter.format(value);
+}
+const showData = (data) => { 
+    let trs = '';
+    data.forEach((item, index) => {
+        console.log(item)
+        trs += `
+        <tr>
+            <td style="text-align:center; width:38px"><span >${index}</span></td>
+            <td style="width:151px"><span >${item.name}</span></td>
+            <td style="width:129px"><span >${item.amount}</span></td>
+            <td style="width:148px"><span >${formatValue(item.price)}</span></td>
+            <td style="width:173px"><span >${formatValue(item.price * item.amount)}</span></td>
+        </tr>
+        `;
+    });
+    return trs;
+}
 class ExportedProductPage extends React.Component {
     constructor(props) {
         super(props);
@@ -89,7 +113,6 @@ class ExportedProductPage extends React.Component {
                 amount,
                 productId,
             }
-            console.log(this.state.state)
             if (this.state.state === 'add') {
                 featchCreateExportProduct(body).then(result => {
                     if (result.status === 200) {
@@ -123,6 +146,7 @@ class ExportedProductPage extends React.Component {
                           this.props.onGetExportProduct(result.data);
                         });
                         this.setState({ modal: false });
+                    
                     }
                 }).catch(err => {
                     this.notificationSystem.addNotification({
@@ -144,60 +168,138 @@ class ExportedProductPage extends React.Component {
         const {entry } = this.state;
         this.setState({ dataForPage: this.props.exportProduct.exportProducts.slice(page*entry, page*entry+entry),currentPage:page});
     }
-    handleOnDelete = () => {
-        this.setState({ deleteModal: false });
-        featchDeleteExportProduct(this.state.id).then(result=>{
-            if (result.status === 200) {
-                featchGetExportProduct().then(result => {
-                    this.props.onGetExportProduct(result.data);
-                });
-                this.notificationSystem.addNotification({
-                    title: <MdInfo/>,
-                    message: 'Xóa hàng xuất thành công!',
-                    level: 'success',
-                });
-                this.setState({
-
-                })
-            } else {
-                this.notificationSystem.addNotification({
-                    title: <MdError/>,
-                    message: 'Xóa hàng xuất thất bại!',
-                    level: 'error',
-                });
-            }
-        }).catch(err => {
-            this.notificationSystem.addNotification({
-                title: <MdError/>,
-                message: 'Xóa hàng xuất thất bại!',
-                level: 'error',
-            });
-        })
-    }
-    handleUpdate = (id) => {
-        this.setState({ id, state: 'update' });
-        this.setState({ modal: true });
-        const { exportProduct} = this.props;
-        const exportProducts = exportProduct.exportProducts || [];
-        const product = exportProducts.find(item => {
-            return item._id === id;
-        });
-        const cuProduct = this.state.products.find(item => {
-            return item._id === product.productId;
-        });
-        this.setState({ selectedOption: cuProduct, amount: product.amount, name: product.name, timeToEnd: product.timeToEnd, totalPrice: product.totalPrice });
-    }
+  
     handleType = (e) => {
         const product = this.state.products.find(item => {
             return item._id === this.state.selectedOption.value;
         })
         this.setState({ totalPrice: product.price * e.target.value });
     }
+    exportReport = async (item) => { 
+        const company =(await featchGetCompany()).data;
+        console.log(company)
+        const { products ,customer} = item;
+        var mywindow = window.open('', 'PRINT');
+
+        // mywindow.document.write('<html><head><title>' + document.title  + '</title>');
+        mywindow.document.write('</head><body >');
+        // mywindow.document.write('<h1>' + document.title  + '</h1>');
+        mywindow.document.write(`
+<style>
+#table {
+    border-collapse: collapse;
+  }
+  
+  #table, #table>th, #table>td {
+    border: 1px solid black;
+  }
+</style>
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+<tbody>
+    <tr>
+        <td>
+        <p style="text-align:center">&nbsp;</p>
+
+        <p style="text-align:center"><span ><strong>${company.name}</strong></span></p>
+
+        <p style="text-align:center"><span >Địa chỉ: ${company.adress}</span></p>
+
+        <p>&nbsp;</p>
+        </td>
+        <td style="text-align:center">
+        <p><span ><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong></span></p>
+
+        <p><span >Độc lập - Tự do - Hạnh phúc</span></p>
+        </td>
+    </tr>
+</tbody>
+</table>
+
+<h2 style="text-align:center"><span ><strong>HÓA ĐƠN XUẤT KHO</strong></span></h2>
+
+<p><br />
+<span >Họ tên khách hàng : ${customer.name||''}</span></p>
+
+<p><span >Số điện thoại: ${customer.phone||""}</span></p>
+
+
+<p><span >Email: ${customer.email||''}</span></p>
+
+
+<h3><span ><strong>Danh sách sản phẩm</strong></span></h3>
+
+<table border="1" cellpadding="0" cellspacing="0" style="width:100%" id='table'>
+    <thead>
+        <tr>
+            <td style="text-align:center; width:38px"><span ><strong>STT</strong></span></td>
+            <td style="text-align:center; width:300px"><span ><strong>Tên SP</strong></span></td>
+            <td style="text-align:center; width:129px"><span ><strong>Số Lượng</strong></span></td>
+            <td style="text-align:center; width:148px"><span ><strong>Đơn giá</strong></span></td>
+            <td style="text-align:center; width:173px"><span ><strong>Thành tiền</strong></span></td>
+        </tr>
+    </thead>
+    <tbody>
+      ${
+            showData(products)
+            }
+       
+        <tr>
+            <td colspan="4" rowspan="1" style="text-align:center; width:99px">
+            <p><span ><strong>Tổng tiền</strong></span></p>
+            </td>
+            <td style="width:173px"><span ><strong>${formatValue(item.totalPrice)}</strong></span></td>
+        </tr>
+    </tbody>
+</table>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+    <tbody>
+        <tr>
+            <td style="width:336px">
+            <p><span >&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></p>
+
+            <p>&nbsp;</p>
+            </td>
+            <td style="text-align:center; width:255px">
+            <p><span >Hà Nội, ${now.getHours()} giờ ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}</span></p>
+
+            <p><span ><strong>Nhân viên xuất</strong></span></p>
+
+            <p><span >(ký tên)</span></p>
+
+            <p>&nbsp;</p>
+
+            <p>&nbsp;</p>
+
+            <p>&nbsp;</p>
+
+            <p><span >${localStorage.getItem('name')}</span></p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+`);
+        mywindow.document.write('</body></html>');
+
+        mywindow.document.close(); // necessary for IE >= 10
+        mywindow.focus(); // necessary for IE >= 10*/
+
+        mywindow.print();
+        mywindow.close();
+ 
+    }
+    handelRedirect = ()=>{ 
+        this.props.history.push('/admin/product/export');
+    }
     render() {
-        const { currentPage ,products} = this.state;
+        const { currentPage } = this.state;
         const { exportProduct} = this.props;
         const exportProducts = exportProduct.exportProducts || [];
-        const newProducts = products.map(item => { return { value: item._id, label: item.name } });
         const getSumValueForEmploy = (price) => {
           
             const formatter = new Intl.NumberFormat('vi-VN', {
@@ -209,14 +311,14 @@ class ExportedProductPage extends React.Component {
           }
         return (
             <Page
-                title="Hàng nhập"
-                breadcrumbs={[{ name: 'Hàng hóa', active: false }, { name: 'Hàng nhập', active: true }]}>
+                title="Hàng xuất"
+                breadcrumbs={[{ name: 'Hàng hóa', active: false }, { name: 'Hàng xuất', active: true }]}>
                 <Row>
                     <Col lg={12} md={12} sm={12} xs={12}>
                         <Card>
                             <CardHeader>
-                              Danh sách hàng nhập
-                                <Button style = {{float:'right'}} size = "sm" outline color='primary' onClick={this.toggle}>Thêm mới</Button>
+                              Danh sách hàng xuất
+                                <Button style = {{float:'right'}} size = "sm" outline color='primary' onClick={this.handelRedirect}>Xuất kho</Button>
                             </CardHeader>
                             <CardBody>
                                 <Table bordered>
@@ -237,14 +339,13 @@ class ExportedProductPage extends React.Component {
                                                     // <tr  key = {item._id} className = {bem.e('row')} onClick = {()=>this.handleOnClickProduc(item._id)}>
                                                     <tr  key = {item._id} className = {bem.e('row')} >
                                                         <th scope="row">{index+1}</th>
-                                                        <td>{item.name}</td>
+                                                        <td>{item.products.map(item => item.name).join()}</td>
                                                         <td>{item.amount}</td>
                                                         <td>{getSumValueForEmploy(item.totalPrice)}</td>
-                                                        <td>{item.timeToEnd}</td>
+                                                        <td>{item.createdAt}</td>
                                             <td>
                                                 <ButtonGroup>
-                                                    <Button color = "info" onClick = {()=>this.handleUpdate(item._id)}>Sửa</Button>
-                                                    <Button color = "danger" onClick = {()=>this.deleteToggle(item._id)} >Xóa</Button>
+                                                    <Button color = "info" onClick = {()=>this.exportReport(item)}>Xuất hóa đơn</Button>
                                                 </ButtonGroup>
                                             </td>
                                                 </tr>
@@ -261,58 +362,7 @@ class ExportedProductPage extends React.Component {
                         </Card>
                     </Col>
                 </Row>
-                <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className} >
-                    <Form onSubmit = {this.handleSubmitCreate}>
-                        <ModalHeader>Thêm mới hàng xuất</ModalHeader>
-                        <ModalBody>
-                            <FormGroup>
-                                <Label for="name">Sản phẩm</Label>
-                                <Select 
-                                    
-                                    value={this.state.selectedOption}
-                                    onChange={this.handleChange}
-                                    options={newProducts}
-                                    placeholder  = "Lựa chọn ..."
-                                />
-                            </FormGroup>
-                           
-                            <FormGroup>
-                                <Label for="amount">Số lượng</Label>
-                                <Input required value = {this.state.amount} onKeyUp = {this.handleType}  onChange = {this.handleChageInput}  type="number" name="amount" id="amount" placeholder="Số lượng" />
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="totalPrice">Giá</Label>
-                                <Input required value = {this.state.totalPrice} onChange = {this.handleChageInput}  type="number" name="totalPrice" id="totalPrice" placeholder="Giá" />
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="timeToEnd">Thời gian nhập</Label>
-                                <Input required value = {this.state.timeToEnd}  onChange = {this.handleChageInput} type="date" name="timeToEnd" id="timeToEnd" placeholder="Thời gian nhập" />
-                            </FormGroup>
-                           
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button type = "submit" color="primary" >Lưu</Button>
-                            <Button color="secondary" onClick={this.toggle}>Hủy bỏ</Button>
-                        </ModalFooter>
-
-                    </Form>
-                </Modal>
-                <NotificationSystem
-                dismissible={false}
-                ref={notificationSystem =>
-                    (this.notificationSystem = notificationSystem)
-                }
-                />
-                <Modal isOpen={this.state.deleteModal} toggle={()=>this.deleteToggle()} className={this.props.className}>
-                    <ModalHeader toggle={()=>this.deleteToggle()} >Cảnh báo</ModalHeader>
-                    <ModalBody>
-                        Bạn có chắc chắn muốn xóa sản phẩm?
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="primary" onClick={this.handleOnDelete}>Xóa</Button>{' '}
-                        <Button color="secondary" onClick={()=>this.deleteToggle()} >Hủy</Button>
-                    </ModalFooter>
-                </Modal>
+           
             </Page>
         );
     }

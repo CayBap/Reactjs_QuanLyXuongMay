@@ -3,7 +3,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux'
 import { Col, Row, Table, Card, CardBody, CardHeader,Button,ButtonGroup ,CardFooter,
    Modal, ModalHeader, ModalBody, ModalFooter,
-    Form,FormGroup,Label,Input
+    Form,FormGroup,Label,Input,Badge,
 } from 'reactstrap';
 import NotificationSystem from 'react-notification-system';
 import {
@@ -17,6 +17,7 @@ import PaginationTable from '../components/Pagination';
 import { featchGetUser, featchCreateUser, featchDeleteUser, featchUpdateUser } from '../services/apis/userService';
 // import { featchGetUser } from '../services/apis/userService';
 import { actGetUserSuccess } from '../actions/userAct';
+import { featchGetRole } from '../services/apis/roleService';
 const bem = bn.create('user');
 
 class UserPage extends React.Component {
@@ -40,7 +41,10 @@ class UserPage extends React.Component {
             isRed: false,
             users: [],
             deleteModal: false,
-            state:'',
+            state: '',
+            roleId:'',
+            roles: [],
+            
         };
     
         this.toggle = this.toggle.bind(this);
@@ -50,6 +54,9 @@ class UserPage extends React.Component {
             this.props.onGetUser(result.data);
               
           });
+          featchGetRole().then(result => { 
+              this.setState({ roles: result.data });
+          })
     }
 
     toggle() {
@@ -69,10 +76,10 @@ class UserPage extends React.Component {
 
     handleSubmitCreate = e => {
         e.preventDefault();
-        const { phone,password,email,lastName,firstName,dob,gender,role } = this.state;
+        const { phone,password,email,lastName,firstName,dob,gender,role,roleId } = this.state;
         if (phone !== "") {
             const body = {
-                phone,password,email,lastName,firstName,dob,gender,role
+                phone,password,email,lastName,firstName,dob,gender,role,roleId,
             }
             if (this.state.state === 'add') {
                 featchCreateUser(body).then(result => {
@@ -122,6 +129,7 @@ class UserPage extends React.Component {
     }
 
     handleChageInput = (e) => {
+        console.log(e.target.value)
         this.setState({ [e.target.name]: e.target.value });
     }
     handleChangePage = (page) => {
@@ -167,8 +175,8 @@ class UserPage extends React.Component {
             return item._id === id;
         });
        
-        const { phone, email, lastName, firstName, dob, gender ,role} = cuUser;
-        this.setState({ phone,password:'',email,lastName,firstName,dob,gender,role });
+        const { phone, email, lastName, firstName, dob, gender ,role,roleId} = cuUser;
+        this.setState({ phone,password:'',email,lastName,firstName,dob,gender,role,roleId });
     }
     render() {
         const { currentPage } = this.state;
@@ -191,9 +199,10 @@ class UserPage extends React.Component {
                                         <tr>
                                             <th>#</th>
                                             <th>Họ tên</th>
-                                            <th>Số lượng</th>
-                                            <th>Đơn giá</th>
-                                            <th>Thời gian xuất</th>
+                                            <th>Giới tính</th>
+                                            <th>Số điện thoại</th>
+                                            <th>Năm sinh</th>
+                                            <th>Quyền hệ thống</th>
                                             <th style = {{width:200}}>Thao tác</th>
                                         </tr>
                                     </thead>
@@ -208,6 +217,7 @@ class UserPage extends React.Component {
                                                         <td>{item.gender===true?'Nam':'Nữ'}</td>
                                                         <td>{item.phone}</td>
                                                         <td>{item.dob}</td>
+                                                        <td>{item.role==='admin'?<Badge color='success'>Quản trị</Badge>:<Badge>Thợ may</Badge>}</td>
                                             <td>
                                                 <ButtonGroup>
                                                     <Button color = "info" onClick = {()=>this.handleUpdate(item._id)}>Sửa</Button>
@@ -241,10 +251,10 @@ class UserPage extends React.Component {
                                 <Label for="email">Email</Label>
                                 <Input required value = {this.state.email} onChange = {this.handleChageInput}  type="email" name="email" id="email" placeholder="Email" />
                             </FormGroup>
-                            <FormGroup>
+                            {this.state.state==='add'?<FormGroup hidden = {this.state.state==='update'}>
                                 <Label for="password">Mật khẩu</Label>
                                 <Input required value = {this.state.password} onChange = {this.handleChageInput}  type="password" name="password" id="password" placeholder="Mật khẩu" />
-                            </FormGroup>
+                            </FormGroup>:null}
                             <FormGroup>
                                 <Label for="lastName">Họ</Label>
                                 <Input required value = {this.state.lastName} onChange = {this.handleChageInput}  type="text" name="lastName" id="lastName" placeholder="Họ" />
@@ -265,10 +275,21 @@ class UserPage extends React.Component {
                                 </Input>
                             </FormGroup>
                             <FormGroup>
-                                <Label for="role">Quyền thao tác</Label>
+                                <Label for="role">Quyền hệ thống</Label>
                                 <Input required value={this.state.role} onChange={this.handleChageInput} type="select" name="role" id="role" >
                                     <option value = 'admin'>Quản trị viên</option>
                                     <option value = 'staff'>Thợ may</option>
+                                </Input>
+                            </FormGroup>
+                            <FormGroup hidden = {this.state.role==='staff'}>
+                                <Label for="role">Quyền thao tác</Label>
+                                <Input  value={this.state.roleId} onChange={this.handleChageInput} type="select" name="roleId" id="roleId" >
+                                <option defaultChecked >---Lựa chọn ---</option>;
+                                    { 
+                                        this.state.roles.map(item => { 
+                                            return <option value={item._id}>{item.name}</option>;
+                                       })
+                                    }
                                 </Input>
                             </FormGroup>
                            

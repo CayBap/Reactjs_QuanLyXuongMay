@@ -7,7 +7,6 @@ const instance = axios.create({
                 'Content-Type': 'application/json'
              }
 });
-console.log(localStorage.getItem('jwt'))
 // Now all requests using this instance will wait 2.5 seconds before timing out
 // instance.defaults.timeout = 2500;
 // instance.defaults.headers.common['Accept'] = 'application/json';
@@ -30,7 +29,8 @@ instance.interceptors.response.use(function (response) {
     // Do something with response data
     return response;
 
-},async function (error) {
+}, async function (error) {
+    console.log(error.response)
     if( error.response.status === 403){
         localStorage.clear();
     } else if (error.response.status === 401) {

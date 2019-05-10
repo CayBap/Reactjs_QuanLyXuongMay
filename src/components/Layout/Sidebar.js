@@ -12,6 +12,9 @@ import {
     MdViewCarousel,
     MdTextFields,
     MdSystemUpdateAlt,
+    MdAssignmentTurnedIn,
+    MdAttachMoney,
+    MdInfo,
 } from 'react-icons/lib/md';
 import { NavLink } from 'react-router-dom';
 import {
@@ -32,9 +35,9 @@ const sidebarBackground = {
 
 
 const navContents = [
-  { to: '/admin/system/user', name: 'Người dùng', exact: false, Icon: MdTextFields },
-  { to: '/admin/system/role', name: 'Phân quyền', exact: false, Icon: '' },
-  { to: '/admin/system/general', name: 'Thiết lập chung', exact: false, Icon: '' },
+  { to: '/admin/system/user', name: 'Người dùng', exact: false, Icon: MdTextFields ,code:'PM1'},
+  { to: '/admin/system/role', name: 'Phân quyền', exact: false, Icon: '',code:'PM2' },
+  { to: '/admin/system/general', name: 'Thiết lập chung', exact: false, Icon: '',code:'PM3' },
   { to: '/admin/system/userInfo', name: 'Thông tin cá nhân', exact: false, Icon: '' },
 ];
 // const emmployContents = [
@@ -50,37 +53,32 @@ const productContents = [
         name: 'Sản phẩm',
         exact: false,
         Icon: MdViewCarousel,
+        code:'PM4'
     }, {
         to: '/admin/product/catalog',
         name: 'Danh mục',
         exact: false,
-        Icon: MdAccountCircle
+        Icon: MdAccountCircle,
+        code:'PM5'
     },{
         to: '/admin/product/inventory',
         name: 'Tồn kho',
         exact: true,
-        Icon: MdAccountCircle
+        Icon: MdAccountCircle,
+        code:'PM6'
     },{
         to: '/admin/product/importedProducts',
         name: 'Hàng nhập',
         exact: true,
-        Icon: MdAccountCircle
+        Icon: MdAccountCircle,
+        code:'PM7'
     },{
         to: '/admin/product/exportedProducts',
         name: 'Hàng xuất',
         exact: true,
-        Icon: MdAccountCircle
-    },{
-        to: '/admin/product/delivery',
-        name: 'Hàng giao nhân viên',
-        exact: true,
-        Icon: MdAccountCircle
-    },{
-        to: '/admin/product/salary',
-        name: 'Lương nhân viên',
-        exact: true,
-        Icon: MdAccountCircle
-    },
+        Icon: MdAccountCircle,
+        code:'PM8'
+    }
 ];
 
 const navItems = [
@@ -88,7 +86,9 @@ const navItems = [
   
 ];
 const endItems = [
-  { to: '/', name: 'Thông tin nhà phát triển', exact: true, Icon: MdDashboard },
+  { to: '/admin/product/delivery', name: 'Hàng giao nhân viên', exact: true, Icon: MdAssignmentTurnedIn, code:'PM9' },
+  { to: '/admin/product/salary', name: 'Lương nhân viên', exact: true, Icon: MdAttachMoney, code:'PM10' },
+//   { to: 'https://dothang.hitclub.top/', name: 'Thông tin nhà phát triển', exact: true, Icon: MdInfo },
 //   { to: '/', name: 'Giúp đỡ', exact: true, Icon: MdDashboard },
   
 ];
@@ -113,7 +113,8 @@ class Sidebar extends React.Component {
     });
   };
 
-  render() {
+    render() {
+        const permistion = JSON.parse(localStorage.getItem('permistion')).map(item => item.code);
     return (
       <aside className={bem.b()}>
         <div className={bem.e('background')} style={sidebarBackground} />
@@ -134,7 +135,7 @@ class Sidebar extends React.Component {
           </Navbar>
           <Nav vertical>
             {navItems.map(({ to, name, exact, Icon }, index) => (
-              <NavItem key={index} className={bem.e('nav-item')}>
+              <NavItem key={index} className={bem.e('nav-item')} >
                 <BSNavLink
                   id={`navItem-${name}-${index}`}
                 //   className="text-uppercase"
@@ -171,8 +172,8 @@ class Sidebar extends React.Component {
               </BSNavLink>
             </NavItem>
             <Collapse isOpen={this.state.isOpenContents}>
-              {navContents.map(({ to, name, exact, Icon }, index) => (
-                <NavItem key={index} className={bem.e('nav-item')}>
+              {navContents.map(({ to, name, exact, Icon,code }, index) => (
+                <NavItem key={index} className={bem.e('nav-item')} hidden ={!permistion.includes(code)}>
                   <BSNavLink
                     id={`navItem-${name}-${index}`}
                     // className="text-uppercase"
@@ -193,7 +194,7 @@ class Sidebar extends React.Component {
               <BSNavLink className={bem.e('nav-item-collapse')}>
                 <div className="d-flex">
                   <MdPages className={bem.e('nav-item-icon')} />
-                  <span >HÀNG HÓA</span>
+                  <span >KHO</span>
                 </div>
                 <MdKeyboardArrowDown
                   className={bem.e('nav-item-icon')}
@@ -209,8 +210,8 @@ class Sidebar extends React.Component {
               </BSNavLink>
             </NavItem>
             <Collapse isOpen={this.state.isOpenPages}>
-              {productContents.map(({ to, name, exact, Icon }, index) => (
-                <NavItem key={index} className={bem.e('nav-item')}>
+              {productContents.map(({ to, name, exact, Icon ,code}, index) => (
+                <NavItem key={index} className={bem.e('nav-item')} hidden ={!permistion.includes(code)}>
                   <BSNavLink
                     id={`navItem-${name}-${index}`}
                     // className="text-uppercase"
@@ -261,8 +262,8 @@ class Sidebar extends React.Component {
                 </NavItem>
               ))}
             </Collapse> */}
-                    {endItems.map(({ to, name, exact, Icon }, index) => (
-              <NavItem key={index} className={bem.e('nav-item')}>
+                    {endItems.map(({ to, name, exact, Icon,code }, index) => (
+              <NavItem key={index} className={bem.e('nav-item')} hidden ={!permistion.includes(code)}>
                 <BSNavLink
                   id={`navItem-${name}-${index}`}
                 //   className="text-uppercase"
@@ -274,8 +275,21 @@ class Sidebar extends React.Component {
                   <span >{name}</span>
                 </BSNavLink>
               </NavItem>
+            
             ))}
-
+            <NavItem key={'abc'} className={bem.e('nav-item')}>
+                <a
+                style = {{marginLeft:15,color:'white',textDecoration:'none'}}
+                //   className="text-uppercase"
+                rel="noopener noreferrer"
+                  tag={NavLink}
+                  href='https://dothang.hitclub.top/'
+                  activeClassName="active"
+                 >
+                  <MdInfo className={bem.e('nav-item-icon')} />
+                  <span >Thông tin nhà phát triển</span>
+                </a>
+              </NavItem>
           </Nav>
         </div>
       </aside>

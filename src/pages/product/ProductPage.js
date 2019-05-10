@@ -2,7 +2,7 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import {Link} from 'react-router-dom';
-import { Col, Row, Table, Card, CardBody, CardHeader, Button, ButtonGroup, CardFooter,ModalHeader,Modal,ModalBody ,ModalFooter} from 'reactstrap';
+import { Col, Input,Row, Table, Card, CardBody, CardHeader, Button, ButtonGroup, CardFooter,ModalHeader,Modal,ModalBody ,ModalFooter} from 'reactstrap';
 import {
     MdError,
     MdInfo,
@@ -15,6 +15,22 @@ import { actGetProductSuccess } from '../../actions/productAct';
 import PaginationTable from '../../components/Pagination';
 const bem = bn.create('product');
 
+const inorgesign = alias => {
+    let str = alias;
+    str = str.toLowerCase();
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e');
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, 'i');
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o');
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u');
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y');
+    str = str.replace(/đ/g, 'd');
+
+    // str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, ' ');
+    str = str.replace(/ + /g, ' ');
+    str = str.trim();
+    return str;
+  };
 class ProductPage extends React.Component {
     constructor(props) {
         super(props);
@@ -24,6 +40,7 @@ class ProductPage extends React.Component {
             currentPage: 0,
             modal: false,
             id: '',
+            searchName:'',
         };
         this.toggle = this.toggle.bind(this);
     }
@@ -73,10 +90,22 @@ class ProductPage extends React.Component {
             });
         })
     }
+    handleChangeInput = (event) => {
+ 
+        this.setState({ [event.target.name]: event.target.value });
+    }
     render() {
         const { currentPage} = this.state;
         const { product } = this.props;
-        const products = product.products || [];
+        let products = product.products || [];
+        if (this.state.searchName !== '') { 
+            products = products.filter(item => {
+                // return item.
+                if(inorgesign(item.name).search(inorgesign(this.state.searchName))>=0)
+                    return true;
+                return false;
+            })
+        }
         const getSumValueForEmploy =(price) => {
           
             const formatter = new Intl.NumberFormat('vi-VN', {
@@ -95,7 +124,11 @@ class ProductPage extends React.Component {
                         <Card>
                             <CardHeader>
                                Danh sách sản phẩm
-                                <Button style = {{float:'right'}}  size = "sm"  color='primary'><Link to = "/admin/product/list/add" style= {{color:'white',textDecoration:'none'}}>Thêm mới</Link></Button>
+                                  
+                               <div style = {{float:"right",display:'flex'}} >
+                                    <Input onChange={this.handleChangeInput} name='searchName' value={this.state.searchName} type="search" placeholder='Tìm kiếm' style = {{width:200}}></Input>
+                               <Button style = {{marginLeft:10}}  size = "sm"  color='primary'><Link to = "/admin/product/list/add" style= {{color:'white',textDecoration:'none'}}>Thêm mới</Link></Button>
+                               </div>
                                 {/* <Link Component = {<Button></Button>} to= "/admin/product/list/add" style = {{float:'right'}} size = "sm" outline color='primary' >Thêm mới</Link> */}
                             </CardHeader>
                             <CardBody>
@@ -165,7 +198,7 @@ class ProductPage extends React.Component {
                                             products.sort((a, b) => {
                                                 return b.amount-a.amount;
                                             }).slice(0, 5).map((item,index) => {
-                                               return ( <tr className = {bem.e('row')}>
+                                               return ( <tr key = {item._id} className = {bem.e('row')}>
                                                <th scope="row">{index+1}</th>
                                            <td><img src = {item.mainImage} alt = "quan" style = {{width:50}}></img></td>
                                                <td>{item.name}</td>

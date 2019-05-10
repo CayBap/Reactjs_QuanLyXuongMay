@@ -47,7 +47,7 @@ const MdNotificationsActiveWithBadge = withBadge({
   },
   children: <small>5</small>,
 })(MdNotificationsActive);
-
+const userImage =  'http://localhost:4040/static/company/'+localStorage.getItem('avatar');
 class Header extends React.Component {
   state = {
     isOpenNotificationPopover: false,
@@ -134,7 +134,9 @@ class Header extends React.Component {
             <NavLink id="Popover2">
               <Avatar
                 onClick={this.toggleUserCardPopover}
-                className="can-click"
+                            className="can-click"
+                            src={userImage}
+            //    src={localStorage.getItem('avatar')}
               />
             </NavLink>
             <Popover

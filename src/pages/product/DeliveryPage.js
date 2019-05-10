@@ -11,7 +11,7 @@ import {
     MdError,
     // MdCardGiftcard,
     MdInfo,
-  } from 'react-icons/lib/md';
+} from 'react-icons/lib/md';
 import Page from '../../components/Page';
 import bn from 'utils/bemnames';
 import PaginationTable from '../../components/Pagination';
@@ -20,6 +20,7 @@ import { actGetDeliverySuccess } from '../../actions/deliveryAct';
 import { featchGetUser } from '../../services/apis/userService';
 import { featchGetDelivery ,featchCreateDelivery, featchDeleteDelivery, featchUpdateDelivery, featchUpdateStatusDelivery} from '../../services/apis/deliveryService';
 const bem = bn.create('product');
+
 
 class DeliveryPage extends React.Component {
     constructor(props) {
@@ -46,7 +47,11 @@ class DeliveryPage extends React.Component {
             arrColor: [],
             arrSize: [],
             color: '',
-            size:''
+            size:'',
+            //filter 
+            filterUser: null,
+            filterProduct: null,
+            filterMonth:null,
         };
     
         this.toggle = this.toggle.bind(this);
@@ -99,6 +104,12 @@ class DeliveryPage extends React.Component {
         this.setState({selectedUser})
 
       }
+    handleChangeUserFilter = (filterUser) => {
+        this.setState({filterUser})
+    }
+    handleChangeProductFilter = (filterProduct) => { 
+        this.setState({ filterProduct });
+    }
     handleSubmitCreate = e => {
         e.preventDefault();
         const { name, userId, timeToEnd, amount, productId,color,size, } = this.state;
@@ -113,7 +124,6 @@ class DeliveryPage extends React.Component {
                 timeToEnd,
                 amount,
             }
-            console.log(body)
             if (this.state.state === 'add') {
                 featchCreateDelivery(body).then(result => {
                     if (result.status === 200) {
@@ -238,12 +248,37 @@ class DeliveryPage extends React.Component {
         const cuProduct = this.state.products.find(item => {
             return item._id === product.productId;
         });
-        this.setState({ selectedProduct: cuProduct, amount: product.amount, timeToEnd: product.timeToEnd, color:product.color,size:product.size });
+        // console.log(cuProduct,product)
+        this.setState({
+            selectedProduct: {
+                value: product.productId,
+                label:product.productName,
+            }, selectedUser: { 
+                value: product.userId,
+                label:product.nameForUser,
+            },
+            productId:product.productId,userId:product.userId, amount: product.amount, timeToEnd: product.timeToEnd, color: product.color, size: product.size, arrColor: cuProduct.color, arrSize: cuProduct.size
+        });
     }
     render() {
         const { currentPage ,products = [],users=[]} = this.state;
         const { delivery} = this.props;
-        const deliverys = delivery.deliverys || [];
+        let deliverys = delivery.deliverys || [];
+        if (this.state.filterMonth) { 
+            deliverys = deliverys.filter(item => {
+                const date = new Date(item.createdAt);
+                const selectDate = new Date(this.state.filterMonth);
+                if (date.getMonth() === selectDate.getMonth() && date.getFullYear() === selectDate.getFullYear())
+                    return true;
+                return false;
+            });
+        }
+        if (this.state.filterProduct) { 
+            deliverys = deliverys.filter(item => item.productId === this.state.filterProduct.value);
+        }
+        if (this.state.filterUser) { 
+            deliverys = deliverys.filter(item => item.userId === this.state.filterUser.value);
+        }
         const newProducts = products.map(item => {
             return {
                 value: item._id,
@@ -256,7 +291,6 @@ class DeliveryPage extends React.Component {
                 label: item.lastName + " " +item.firstName,
             };
         });
-        
         return (
             <Page
                 title="Giao hàng"
@@ -264,8 +298,25 @@ class DeliveryPage extends React.Component {
                 <Row>
                     <Col lg={12} md={12} sm={12} xs={12}>
                         <Card>
-                            <CardHeader>
+                            <CardHeader style={{display:'flex',justifyContent:'space-between'}}>
                               Danh sách hàng nhập
+                              <Select 
+                                    value={this.state.filterUser}
+                                    onChange={this.handleChangeUserFilter}
+                                    options={newUsers}
+                                    placeholder="Tên nhân viên ..."
+                                    // styles={{width:'200px !important'}}
+                                    className={bem.e('select')}
+                                />
+                               <Select 
+                                    
+                                    value={this.state.filterProduct}
+                                    onChange={this.handleChangeProductFilter}
+                                    options={newProducts}
+                                    placeholder  = "Tên sản phẩm ..."
+                                    className={bem.e('select')}
+                                />
+                           <Input style={{width:200}} type='month' name='filterMonth' value = {this.state.filterMonth}  onChange={this.handleChageInput}></Input>
                                 <Button style = {{float:'right'}} size = "sm" outline color='primary' onClick={this.toggle}>Thêm mới</Button>
                             </CardHeader>
                             <CardBody>
@@ -328,14 +379,15 @@ class DeliveryPage extends React.Component {
                                     value={this.state.selectedProduct}
                                     onChange={this.handleChange}
                                     options={newProducts}
-                                    placeholder  = "Lựa chọn ..."
+                                    // placeholder="Lựa chọn ..."
+                                    placeholder = {'Lựa chọn ...'}
                                 />
                             </FormGroup>
 
                             <FormGroup>
                                 <Label for="name">Thợ may</Label>
                                 <Select 
-                                    
+                                   
                                     value={this.state.selectedUser}
                                     onChange={this.handleChangeUser}
                                     options={newUsers}

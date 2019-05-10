@@ -229,7 +229,7 @@ class CatalogPage extends React.Component {
                         <Button color="secondary" onClick={this.toggle}>Hủy bỏ</Button>
                     </ModalFooter>
                 </Modal>
-                <Modal isOpen={this.state.modalUpdate} toggle={this.toggleUpdate} className={this.props.className} >
+                <Modal isOpen={this.state.modalUpdate} toggle={this.handleCloseModel} className={this.props.className} >
                     <ModalHeader>Cập nhập danh mục</ModalHeader>
                     <ModalBody>
                         <Form>

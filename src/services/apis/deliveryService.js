@@ -10,31 +10,27 @@ export const featchCreateDelivery = (body) => {
 }
 export const featchGetDelivery = () => {
     return axios.get(DELIVERY,{
-        method: 'GET',
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     })
 }
-export const featchGetDeliveryByUser = (idUser) => {
+export const featchGetDeliveryByUser = (idUser,query) => {
     return axios.get(DELIVERY+'/user/'+idUser,{
-        method: 'GET',
+        params:query,
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     })
 }
 export const featchGetADelivery = (id) => {
-    return axios.get(`${DELIVERY}/${id}`,{
-        method: 'GET',
+    return axios.get(`${DELIVERY}/${id}`, {
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     } );
 }
 export const featchUpdateDelivery = (id,body) => {
     return axios.put(`${DELIVERY}/${id}`,body,{
-        method: 'GET',
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     } );
 }
 export const featchDeleteDelivery = (id) => {
     return axios.delete(`${DELIVERY}/${id}`,{
-        method: 'GET',
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     } );
 }

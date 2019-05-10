@@ -2,7 +2,8 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux'
 import {
-    Col, Row, Table, Card, CardBody, CardHeader, CardFooter,
+    Col, Row, Table, Card, CardBody, CardHeader, CardFooter, Label,
+    Input , Button
 } from 'reactstrap';
 import NumberWidget from '../components/Widget/NumberWidget';
 import Page from '../components/Page';
@@ -11,7 +12,26 @@ import PaginationTable from '../components/Pagination';
 import { actGetImportProductSuccess } from '../actions/importProductAct';
 import { featchGetDeliveryByUser } from '../services/apis/deliveryService';
 const bem = bn.create('product');
+const now = new Date();
+const nowString = now.getFullYear() + '-' + (now.getMonth()  < 10 ? '0' + (now.getMonth() +1) : now.getMonth() + 1) + '-30';
+const lastString = now.getFullYear() + '-' + (now.getMonth() < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1) + '-01';
 
+const inorgesign = alias => {
+    let str = alias;
+    str = str.toLowerCase();
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a');
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e');
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, 'i');
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o');
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u');
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y');
+    str = str.replace(/đ/g, 'd');
+
+    // str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, ' ');
+    str = str.replace(/ + /g, ' ');
+    str = str.trim();
+    return str;
+  };
 class EmployPage extends React.Component {
     constructor(props) {
         super(props);
@@ -31,16 +51,20 @@ class EmployPage extends React.Component {
             value1: 0,
             value2: 0,
             value3: 0,
-            value4:0,
+            value4: 0,
+            from:lastString,
+            to: nowString,
+            search:'',
         };
     
       }
-      componentWillMount() {
-        //   featchGetImportProduct().then(result => {
-        //     this.props.onGetImportProduct(result.data);
-        //   });
-
-          featchGetDeliveryByUser(localStorage.getItem('id')).then(result => {
+    componentWillMount() {
+        const {from ,to } = this.state;
+          const query = {
+              from,
+              to,
+          };
+          featchGetDeliveryByUser(localStorage.getItem('id'),query).then(result => {
 
               let value1 = 0;
               let value2 = 0;
@@ -60,17 +84,53 @@ class EmployPage extends React.Component {
     }
     componentDidMount() {
         document.querySelector('.navbar-nav').style.display = 'none';
-
         
     }
+    handleClickPull = () => { 
+        const {from ,to } = this.state;
+        const query = {
+            from,
+            to,
+        };
+        featchGetDeliveryByUser(localStorage.getItem('id'), query).then(result => {
 
+            let value1 = 0;
+            let value2 = 0;
+            let value3 = 0;
+            let value4 = 0;
+            result.data.forEach(item => {
+                value1 += item.amount * item.productId.priceForEmploy;
+                value2++;
+                if (item.finished) {
+                    value3++;
+                } else {
+                    value4++;
+                }
+            });
+            this.setState({ delivery: result.data, value1, value2, value3, value4 });
+        });
+    }
 
     handleChangePage = (page) => {
         const {entry } = this.state;
         this.setState({ dataForPage: this.state.delivery.slice(page*entry, page*entry+entry),currentPage:page});
     }
+    handleChangeInput = (e)=>{
+        this.setState({[e.target.name]:e.target.value});
+    }
     render() {
-        const { currentPage, delivery } = this.state;
+        const { currentPage, from, to, search } = this.state;
+        let delivery = this.state.delivery;
+        // console.log(delivery)
+        
+        if (this.state.search !== '') { 
+            delivery = delivery.filter(item => {
+                // return item.
+                if(inorgesign(item.productName).search(inorgesign(this.state.search))>=0)
+                    return true;
+                return false;
+            })
+        }
         const getSumValueForEmploy =(price) => {
           
             const formatter = new Intl.NumberFormat('vi-VN', {
@@ -79,7 +139,9 @@ class EmployPage extends React.Component {
                 minimumFractionDigits: 0
             });
             return formatter.format(price);
-          }
+        }
+
+        
         return (
             <Page
                 title="Thợ may"
@@ -89,6 +151,14 @@ class EmployPage extends React.Component {
                         <Card>
                             <CardHeader>
                               Danh sách hàng đã nhận
+                                  <div>
+                                    <Label for="to" style = {{textTransform:"none"}}>Từ ngày</Label>
+                                    <Input type="date" name="from" id="from" value ={from.toString()} onChange = {this.handleChangeInput}  />
+                                    <Label for="to" style = {{textTransform:"none"}}>Đến ngày</Label>
+                                    <Input type="date" name="to" id="to" value = {to.toString()} onChange = {this.handleChangeInput}   />
+                                    <Button onClick = {this.handleClickPull} style={{ marginTop: 10,marginBottom:10 }}>Lọc</Button>
+                                    <Input placeholder='Tìm kiếm ...' type="search" name="search" id="search" value = {search} onChange = {this.handleChangeInput}   />
+                                  </div>
                             </CardHeader>
                             <CardBody>
                                 <Table bordered>
@@ -149,45 +219,45 @@ class EmployPage extends React.Component {
                                 <NumberWidget
                                     style = {{margin:10}}
                                 title="Tổng thu nhập"
-                                subtitle="Tháng 2"
+                                subtitle="Tháng này"
                                 number={getSumValueForEmploy(this.state.value1)}
                                 color="secondary"
                                 progress={{
                                     value: 100,
-                                    label: 'Tháng 1',
+                                    label: 'Tháng trước',
                                 }}
                                 />
                                 <NumberWidget
                                     style = {{margin:10}}
                                 title="Tổng số lô đã nhận"
-                                subtitle="Tháng 2"
+                                subtitle="Tháng này"
                                 number={(this.state.value2)}
                                 color="primary"
                                 progress={{
                                     value: 100,
-                                    label: 'Tháng 1',
+                                    label: 'Tháng trước',
                                 }}
                                 />
                                 <NumberWidget
                                     style = {{margin:10}}
                                 title="Tổng sô lô đã trả"
-                                subtitle="Tháng 2"
+                                subtitle="Tháng này"
                                 number={(this.state.value3)}
                                 color="info"
                                 progress={{
                                     value: 100,
-                                    label: 'Tháng 1',
+                                    label: 'Tháng trước',
                                 }}
                                 />
                                 <NumberWidget
                                     style = {{margin:10}}
                                 title="Tổng sô lô chưa trả"
-                                subtitle="Tháng 2"
+                                subtitle="Tháng này"
                                 number={(this.state.value4)}
                                 color="danger"
                                 progress={{
                                     value: 100,
-                                    label: 'Tháng 1',
+                                    label: 'Tháng trước',
                                 }}
                                 />
                             </CardBody>

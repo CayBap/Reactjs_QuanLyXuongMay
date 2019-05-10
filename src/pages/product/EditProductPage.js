@@ -118,7 +118,7 @@ class EditProductPage extends React.Component {
     }
     
     render() {
-        
+        console.log(this.state.subImage)
         const { cate } = this.props;
         const cates = cate.cates || [];
         return (

@@ -45,9 +45,15 @@ export const featchDeleteUser = (id) => {
 }
 export const featchProfile = () => {
     return axios.get(`${USER}/profile`,{
-
         headers: { 'x-access-token': localStorage.getItem('jwt') },
     } );
+}
+export const featchAddLog = (body) => {
+    return axios.post(`${USER}/addLog`, body, {
+        headers: {
+            'x-access-token': localStorage.getItem('jwt')
+        },
+    });
 }
 export const featchExport = (idUser,from,to) => {
     return axios.get(`${USER}/export/${idUser}`,{

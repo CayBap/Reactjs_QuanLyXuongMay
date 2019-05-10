@@ -22,7 +22,6 @@ export const featchGetAExportProduct = (id) => {
     });
 }
 export const featchUpdateExportProduct = (id, body) => {
-    console.log(body)
     return axios.put(`${EXPORT_PRODUCT}/${id}`,body,{
         method: 'GET',
         headers: { 'x-access-token': localStorage.getItem('jwt') },
